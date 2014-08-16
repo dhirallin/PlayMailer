@@ -1,0 +1,581 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{5b81076b-7005-406b-9f5d-a1dd238ee8f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\datatypes">
+      <UniqueIdentifier>{5baeb289-e8a7-468a-a2e0-51492ea81481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level">
+      <UniqueIdentifier>{8358dcfa-041b-4fb6-bc77-fb2eb7daf1dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\imap">
+      <UniqueIdentifier>{44665473-1cc4-467a-aa5c-c781aa061572}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\pop3">
+      <UniqueIdentifier>{f7b19826-a5ba-4276-b915-6faeb62c119a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\mime">
+      <UniqueIdentifier>{76f550de-0380-4c60-9a49-b20bd7324993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\imf">
+      <UniqueIdentifier>{592397b8-8115-48a3-8732-60e62b5bca6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\maildir">
+      <UniqueIdentifier>{0c1232ea-5c4a-493a-9653-dc135a1dbbd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\mbox">
+      <UniqueIdentifier>{cb037f8b-adf5-4f48-8f9e-2cedf2223abc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\mh">
+      <UniqueIdentifier>{8b91b37f-3c92-44af-bdb9-b8edae9af1da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\nntp">
+      <UniqueIdentifier>{1c1629d1-0113-4009-92d2-b4600997719f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\low-level\smtp">
+      <UniqueIdentifier>{cd2098ce-f9e4-491e-8bc6-c3e0b9e11772}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver">
+      <UniqueIdentifier>{27fd1105-7072-4073-a3dd-617c8a25609e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\interface">
+      <UniqueIdentifier>{f5e0b51c-89fa-4804-984f-d4faa0150cfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation">
+      <UniqueIdentifier>{b24fe5de-4f2a-41a7-9872-45c514147707}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\data-message">
+      <UniqueIdentifier>{753763a2-0bd3-453e-b675-22db25bee615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\db">
+      <UniqueIdentifier>{a8a31c0e-01a9-4dd2-aa3a-67a217cb595a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\hotmail">
+      <UniqueIdentifier>{dd4bade9-464a-427d-aa1d-fc5782f1e1f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\imap">
+      <UniqueIdentifier>{812fe42e-038c-455d-8aaa-424e72b96fc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\maildir">
+      <UniqueIdentifier>{044bb37a-f8e9-4d4f-aa21-fbf06e687339}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\mbox">
+      <UniqueIdentifier>{35d2d67c-18e3-4a9f-bfa6-b991661ed86f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\mh">
+      <UniqueIdentifier>{7309e646-9f12-4387-9794-f424ccd27253}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\mime-message">
+      <UniqueIdentifier>{2c167059-1722-4100-a122-5ec6e2b10ca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\nntp">
+      <UniqueIdentifier>{49c06294-c5b4-4b5e-a0a8-4694b64e58cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\implementation\pop3">
+      <UniqueIdentifier>{2b64f0b1-ad98-4cc1-854c-ff065c682d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\driver\tools">
+      <UniqueIdentifier>{9d2e1a76-58c6-409e-a16d-5e58fe6edcf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Windows">
+      <UniqueIdentifier>{44be5cb7-9b78-41bd-8457-5e3d54a8c0ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\engine\mailengine.c">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\mailprivacy.c">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\mailprivacy_gnupg.c">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\mailprivacy_smime.c">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\engine\mailprivacy_tools.c">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\base64.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\carray.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\charconv.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\chash.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\clist.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\connect.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mail_cache_db.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\maillock.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailsasl.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailsem.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream_cancel.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream_helper.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream_low.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream_socket.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream_ssl.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mapping.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\md5.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mmapstring.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\timeutils.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\acl.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\acl_parser.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\acl_sender.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\acl_types.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\annotatemore.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\annotatemore_parser.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\annotatemore_sender.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\annotatemore_types.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_extension.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_helper.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_keywords.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_parser.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_print.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_sender.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_socket.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_ssl.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_types.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\mailimap_types_helper.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\quota.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\quota_parser.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\quota_sender.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\quota_types.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\uidplus.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\uidplus_parser.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\uidplus_sender.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\uidplus_types.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\pop3\mailpop3.c">
+      <Filter>Source Files\low-level\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\pop3\mailpop3_helper.c">
+      <Filter>Source Files\low-level\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\pop3\mailpop3_socket.c">
+      <Filter>Source Files\low-level\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\pop3\mailpop3_ssl.c">
+      <Filter>Source Files\low-level\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_content.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_decode.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_disposition.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_types.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_types_helper.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_write.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_write_file.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_write_generic.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mime\mailmime_write_mem.c">
+      <Filter>Source Files\low-level\mime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf_types.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf_types_helper.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf_write.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf_write_file.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf_write_generic.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imf\mailimf_write_mem.c">
+      <Filter>Source Files\low-level\imf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\maildir\maildir.c">
+      <Filter>Source Files\low-level\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mbox\mailmbox.c">
+      <Filter>Source Files\low-level\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mbox\mailmbox_parse.c">
+      <Filter>Source Files\low-level\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mbox\mailmbox_types.c">
+      <Filter>Source Files\low-level\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\mh\mailmh.c">
+      <Filter>Source Files\low-level\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\nntp\newsnntp.c">
+      <Filter>Source Files\low-level\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\nntp\newsnntp_socket.c">
+      <Filter>Source Files\low-level\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\nntp\newsnntp_ssl.c">
+      <Filter>Source Files\low-level\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\smtp\mailsmtp.c">
+      <Filter>Source Files\low-level\smtp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\smtp\mailsmtp_helper.c">
+      <Filter>Source Files\low-level\smtp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\smtp\mailsmtp_socket.c">
+      <Filter>Source Files\low-level\smtp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\smtp\mailsmtp_ssl.c">
+      <Filter>Source Files\low-level\smtp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\maildriver.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\maildriver_tools.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\maildriver_types.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\maildriver_types_helper.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\mailfolder.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\mailmessage.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\mailmessage_tools.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\mailmessage_types.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\mailstorage.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\interface\mailstorage_tools.c">
+      <Filter>Source Files\driver\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\data-message\data_message_driver.c">
+      <Filter>Source Files\driver\implementation\data-message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\db\dbdriver.c">
+      <Filter>Source Files\driver\implementation\db</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\db\dbdriver_message.c">
+      <Filter>Source Files\driver\implementation\db</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\db\dbstorage.c">
+      <Filter>Source Files\driver\implementation\db</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\hotmail\hotmailstorage.c">
+      <Filter>Source Files\driver\implementation\hotmail</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\imap\imapdriver.c">
+      <Filter>Source Files\driver\implementation\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\imap\imapdriver_cached.c">
+      <Filter>Source Files\driver\implementation\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\imap\imapdriver_cached_message.c">
+      <Filter>Source Files\driver\implementation\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\imap\imapdriver_message.c">
+      <Filter>Source Files\driver\implementation\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\imap\imapdriver_tools.c">
+      <Filter>Source Files\driver\implementation\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\imap\imapstorage.c">
+      <Filter>Source Files\driver\implementation\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\maildir\maildirdriver.c">
+      <Filter>Source Files\driver\implementation\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\maildir\maildirdriver_cached.c">
+      <Filter>Source Files\driver\implementation\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\maildir\maildirdriver_cached_message.c">
+      <Filter>Source Files\driver\implementation\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\maildir\maildirdriver_message.c">
+      <Filter>Source Files\driver\implementation\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\maildir\maildirdriver_tools.c">
+      <Filter>Source Files\driver\implementation\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\maildir\maildirstorage.c">
+      <Filter>Source Files\driver\implementation\maildir</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mbox\mboxdriver.c">
+      <Filter>Source Files\driver\implementation\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mbox\mboxdriver_cached.c">
+      <Filter>Source Files\driver\implementation\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mbox\mboxdriver_cached_message.c">
+      <Filter>Source Files\driver\implementation\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mbox\mboxdriver_message.c">
+      <Filter>Source Files\driver\implementation\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mbox\mboxdriver_tools.c">
+      <Filter>Source Files\driver\implementation\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mbox\mboxstorage.c">
+      <Filter>Source Files\driver\implementation\mbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mh\mhdriver.c">
+      <Filter>Source Files\driver\implementation\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mh\mhdriver_cached.c">
+      <Filter>Source Files\driver\implementation\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mh\mhdriver_cached_message.c">
+      <Filter>Source Files\driver\implementation\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mh\mhdriver_message.c">
+      <Filter>Source Files\driver\implementation\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mh\mhdriver_tools.c">
+      <Filter>Source Files\driver\implementation\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mh\mhstorage.c">
+      <Filter>Source Files\driver\implementation\mh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\mime-message\mime_message_driver.c">
+      <Filter>Source Files\driver\implementation\mime-message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\nntp\nntpdriver.c">
+      <Filter>Source Files\driver\implementation\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\nntp\nntpdriver_cached.c">
+      <Filter>Source Files\driver\implementation\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\nntp\nntpdriver_cached_message.c">
+      <Filter>Source Files\driver\implementation\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\nntp\nntpdriver_message.c">
+      <Filter>Source Files\driver\implementation\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\nntp\nntpdriver_tools.c">
+      <Filter>Source Files\driver\implementation\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\nntp\nntpstorage.c">
+      <Filter>Source Files\driver\implementation\nntp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\pop3\pop3driver.c">
+      <Filter>Source Files\driver\implementation\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\pop3\pop3driver_cached.c">
+      <Filter>Source Files\driver\implementation\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\pop3\pop3driver_cached_message.c">
+      <Filter>Source Files\driver\implementation\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\pop3\pop3driver_message.c">
+      <Filter>Source Files\driver\implementation\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\pop3\pop3driver_tools.c">
+      <Filter>Source Files\driver\implementation\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\implementation\pop3\pop3storage.c">
+      <Filter>Source Files\driver\implementation\pop3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\tools\generic_cache.c">
+      <Filter>Source Files\driver\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\tools\imfcache.c">
+      <Filter>Source Files\driver\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\tools\mailthread.c">
+      <Filter>Source Files\driver\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\driver\tools\mailthread_types.c">
+      <Filter>Source Files\driver\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\dirent.c">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\inet_aton.c">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\misc.c">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\mmap.c">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\time_r.c">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\data-types\mailstream_cfstream.c">
+      <Filter>Source Files\datatypes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\xlist.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\namespace.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\namespace_parser.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\namespace_types.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\namespace_sender.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\win_init.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\low-level\imap\idle.c">
+      <Filter>Source Files\low-level\imap</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\windows\win_etpan.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libetpan-config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libetpan_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\build_headers.list">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

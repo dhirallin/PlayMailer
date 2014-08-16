@@ -1,0 +1,18 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=PlayMailer Help.chm
+Contents file=Table of Contents.hhc
+Default Window=Normal
+Default topic=Quick Start.htm
+Display compile progress=No
+Language=0x409 English (United States)
+
+[WINDOWS]
+Normal="PlayMailer Help","Table of Contents.hhc",,"Quick Start.htm",,,,,,0x2120,,0x3006,[109,30,1152,721],,,,,,,0
+
+
+[FILES]
+Quick Start.htm
+
+[INFOTYPES]
+
