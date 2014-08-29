@@ -22,10 +22,14 @@ public:
 	BOOL lastSoundState;
 	static SearchReplace ConfigReplaceStrings[];
 	static int NUM_CONFIG_REPLACE_STRINGS;
-	
+	static TCHAR *GAME_EXE_NAME_LIST[];
+	static int NUM_GAME_EXE_NAMES;
+
 	SessionInfo *AllocSession();
 	SearchReplace *GetConfigReplaceStrings();
 	int GetNumConfigReplaceStrings();
+	TCHAR **GetGameExeNameList();
+	int GetNumGameExeNames();
 
 	GGWarlordsSettings() : lastObserveState(FALSE), lastSoundState(FALSE)
 	{
@@ -33,7 +37,6 @@ public:
 		this->gameDetails = L"SSG 1990";
 		this->MAX_TEAMS = 8;
 		this->NUM_FACTIONS = 8;
-		this->GAME_EXE_NAME = L"warlords.exe";
 		this->RUN_DELAY = 6 * SECONDS;
 		this->FS_MOUSE_MODIFIER = 2.0;
 

@@ -11,6 +11,9 @@ TCHAR mbBuffer[MBBUFFER_SIZE];
 
 GlobalGameSettings *CurrentGG;
 
+TCHAR *GlobalGameSettings::GAME_EXE_NAME_LIST[];
+int GlobalGameSettings::NUM_GAME_EXE_NAMES = 1;
+
 SearchReplace GlobalGameSettings::ConfigReplaceStrings[] = { 
 	{L"fullscreen=", L"fullscreen=false"}
 };
@@ -27,6 +30,26 @@ int GlobalGameSettings::NUM_CONFIG_REPLACE_STRINGS = 1;
 #ifndef IDD_TEAM
 #define IDD_TEAM 1
 #endif
+
+TCHAR *GlobalGameSettings::GetGameExeName()
+{
+	TCHAR exePath[MAX_PATH];
+
+	if(this->GetNumGameExeNames() == 1)
+		return GAME_EXE_NAME;
+
+	if(gameFolderPath[0] != L'\0')
+	{
+		for(int i = 0; i < this->GetNumGameExeNames(); i++)
+		{
+			swprintf(exePath, MAX_PATH, L"%s%s", gameFolderPath, this->GetGameExeNameList()[i]);	
+			if(!_waccess(exePath, 0))
+				return this->GetGameExeNameList()[i];
+		}
+	}
+
+	return this->GetGameExeNameList()[0];
+}
 
 void GlobalGameSettings::InitDialogGG()
 {
@@ -215,7 +238,7 @@ void GlobalGameSettings::CreateRunCommand()
 			return;
 		}
 	
-		swprintf(this->runCommand, MAX_PATH, L"\"%s\" \"%s%s\"", (*PTR_settings)->DOSBoxPath, this->gameFolderPath, this->GAME_EXE_NAME);
+		swprintf(this->runCommand, MAX_PATH, L"\"%s\" \"%s%s\"", (*PTR_settings)->DOSBoxPath, this->gameFolderPath, this->GetGameExeName());
 	
 		if(!GetDOSBoxConfPath(srcPath))
 		{
@@ -247,7 +270,7 @@ void GlobalGameSettings::CreateRunCommand()
 	}
 	else
 	{
-		swprintf(this->runCommand, MAX_PATH, L"\"%s%s\"", this->gameFolderPath, this->GAME_EXE_NAME);
+		swprintf(this->runCommand, MAX_PATH, L"\"%s%s\"", this->gameFolderPath, this->GetGameExeName());
 	}
 
 	if(wcscmp(this->runCommand, oldRunCommand))

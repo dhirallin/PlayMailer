@@ -27,6 +27,8 @@ public:
 	BOOL useDefaultRunCommand;
 	BOOL displayGameTip;
 	TCHAR *GAME_EXE_NAME;
+	static TCHAR *GAME_EXE_NAME_LIST[];
+	static int NUM_GAME_EXE_NAMES;
 	int RUN_DELAY;
 	HMODULE hModule;
 	BOOL RandomFactionOrder;	
@@ -45,6 +47,9 @@ public:
 	static SearchReplace ConfigReplaceStrings[];
 	static int NUM_CONFIG_REPLACE_STRINGS;
 
+	virtual TCHAR *GetGameExeName();
+	virtual	TCHAR **GetGameExeNameList() { return NULL; };
+	virtual int GetNumGameExeNames() { return 1; };
 	virtual SessionInfo *AllocSession() = 0;
 	virtual void FreeSession(SessionInfo *session);
 	virtual BOOL IsGameWindow(HWND hwnd);
@@ -78,6 +83,7 @@ public:
 	{
 		gameFolderPath[0] = L'\0';
 		runCommand[0] = L'\0';
+		GAME_EXE_NAME = L"";
 		runCommandChanged = FALSE;
 		FS_MOUSE_MODIFIER = 1;
 		MOUSE_MODIFIER = 1;

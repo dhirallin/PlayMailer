@@ -11,8 +11,21 @@ TCHAR *GWarlords::FactionNames[] = {L"The Sirians", L"Storm Giants", L"Grey Dwar
 const int GWarlords::NUM_DIFFICULTIES	= 4;
 TCHAR *GWarlords::DifficultyNames[] = {L"Knight (Easiest)", L"Baron", L"Lord", L"Warlord (Hardest)"};
 
+TCHAR *GGWarlordsSettings::GAME_EXE_NAME_LIST[] = {L"warlords.exe", L"wl210.exe"};
+int GGWarlordsSettings::NUM_GAME_EXE_NAMES = 2;
+
 SearchReplace GGWarlordsSettings::ConfigReplaceStrings[] = {L"aspect=", L"aspect=true"};
 int GGWarlordsSettings::NUM_CONFIG_REPLACE_STRINGS = 1;
+
+TCHAR **GGWarlordsSettings::GetGameExeNameList()
+{
+	return GAME_EXE_NAME_LIST; 
+}
+
+int GGWarlordsSettings::GetNumGameExeNames()
+{
+	return NUM_GAME_EXE_NAMES;
+}
 
 PLUGINS_API GlobalGameSettings *CreatePlugin()
 {
