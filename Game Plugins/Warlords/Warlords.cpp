@@ -6,6 +6,10 @@
 const int GWarlords::COMPUTER_ENHANCED	= 8;
 const int GWarlords::INTENSE_COMBAT		= 31;
 
+const int GWarlords::SCENARIO_NONE		= 0;
+const int GWarlords::SCENARIO_WLED		= 1;
+const int GWarlords::SCENARIO_WLEDIT	= 2;
+
 TCHAR *GWarlords::FactionNames[] = {L"The Sirians", L"Storm Giants", L"Grey Dwarves", L"Orcs of Kor", L"Elvallie", L"The Selentines", L"Horse Lords", L"Lord Bane"}; 
 
 const int GWarlords::NUM_DIFFICULTIES	= 4;
@@ -63,6 +67,36 @@ SearchReplace *GGWarlordsSettings::GetConfigReplaceStrings()
 int GGWarlordsSettings::GetNumConfigReplaceStrings()
 {
 	return NUM_CONFIG_REPLACE_STRINGS;
+}
+
+INT_PTR CALLBACK GWarlords::GameSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	static SessionInfo *session;
+
+	switch(message)
+	{
+		case WM_INITDIALOG:
+			session = (SessionInfo *)lParam;
+			return TRUE;
+		case WM_COMMAND:
+			if(HIWORD(wParam) == BN_CLICKED) 
+				GWarlords::UpdateGameSettingsDialog(hDialog);
+			break;
+		default:
+			break;
+	}
+
+	return FALSE;
+}
+
+void GWarlords::UpdateGameSettingsDialog(HWND hGameDlg)
+{
+	BOOL show;
+
+	show = (IsDlgButtonChecked(hGameDlg, IDC_SCENARIO_NONE_RADIO) ? false : true);
+	
+	EnableWindow(GetDlgItem(hGameDlg, IDC_SCENARIOPATH_EDIT), show);
+	EnableWindow(GetDlgItem(hGameDlg, IDC_SCENARIOPATH_BUTTON), show);
 }
 
 BOOL GWarlords::NewGame()
@@ -208,7 +242,7 @@ void GWarlords::InitGameSettingsDialog()
 	GWarlordsSettings *game;
 	HWND hDlg = *PTR_hSessionSettingsDialog;
 	
-	*PTR_hGameSettingsDialog = CreateDialogParam(this->ggSettings->hModule, MAKEINTRESOURCE(IDD_GAME), *PTR_hSessionSettingsDialog, NULL, NULL);
+	*PTR_hGameSettingsDialog = CreateDialogParam(this->ggSettings->hModule, MAKEINTRESOURCE(IDD_GAME), *PTR_hSessionSettingsDialog, GameSettingsDialogProc, (LPARAM)this);
 	SetWindowPos(*PTR_hGameSettingsDialog, GetDlgItem(*PTR_hSessionSettingsDialog, EDITPLAYERS_BUTTON), DLUToPixelsX(hDlg, GAME_SETTINGS_PANE_X), DLUToPixelsY(hDlg, GAME_SETTINGS_PANE_Y), 0, 0, SWP_NOSIZE);
 
 	for(int i = 0; i < NUM_DIFFICULTIES; i++)
@@ -226,6 +260,10 @@ void GWarlords::InitGameSettingsDialog()
 	
 	if(this->turnNumber > 1)
 		EnableWindow(GetDlgItem(*PTR_hGameSettingsDialog, IDC_DIFFICULTY_COMBO), FALSE);
+
+	SendDlgItemMessage(*PTR_hGameSettingsDialog, IDC_SCENARIO_NONE_RADIO + game->scenarioType, BM_SETCHECK, BST_CHECKED, 0);
+
+	UpdateGameSettingsDialog(*PTR_hGameSettingsDialog);
 }
 
 BOOL GWarlords::ParseGameSettingsDialog()
@@ -301,6 +339,8 @@ void GWarlords::InitGameSettings()
 	this->gameSettings.saveSlot = 1;
 	this->gameSettings.observeOff = TRUE;
 	this->gameSettings.difficulty = 3;
+	this->gameSettings.scenarioType = SCENARIO_NONE;
+	this->gameSettings.scenarioPath[0] = L'\0';
 }
 
 void GWarlords::SaveGameSettings(config_setting_t *group)

@@ -74,7 +74,12 @@ public:
 	// Bit flags
 	static const int COMPUTER_ENHANCED;
 	static const int INTENSE_COMBAT;
-		
+
+	// Scenario types
+	static const int SCENARIO_NONE;
+	static const int SCENARIO_WLED;
+	static const int SCENARIO_WLEDIT;
+
 	struct GWarlordsSettings : GameSettings
 	{
 		int saveSlot;
@@ -83,6 +88,8 @@ public:
 		int difficulty;
 		BOOL enhanced;
 		BOOL intenseCombat;
+		int scenarioType;
+		TCHAR scenarioPath[MAX_PATH];
 	} gameSettings;
 
 	// Overridden functions
@@ -104,6 +111,8 @@ public:
 	void SetGameSettingsMask();
 	BOOL CheckGameSettingsChanged(SessionInfo *newSession);
 	TCHAR *GetSaveFileName(TCHAR *name);
+	static INT_PTR CALLBACK GameSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
+	static void UpdateGameSettingsDialog(HWND hGameDlg);
 
 	TCHAR **GetFactionNames()
 	{
