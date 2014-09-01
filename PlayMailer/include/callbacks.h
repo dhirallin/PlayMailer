@@ -55,7 +55,7 @@ struct PluginCallbacks
 	BOOL (*ReplaceLinesInFile)(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int numSearches);
 	Player ** (*AllocPlayers)();
 	BOOL (*GetFolderSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
-	BOOL (*GetFileSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
+	BOOL (*GetFileSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle, TCHAR *initialDir, TCHAR *filter);
 	TCHAR * (*trimWhiteSpace)(TCHAR *inputStr);
 	int (*MessageBoxS)(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
 	INT_PTR (*DialogBoxParamS)(HINSTANCE hInstance, LPCWSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
@@ -84,6 +84,8 @@ struct PluginCallbacks
 	void (*PressKeyDown)(WORD vKey, BOOL delay);
 	void (*PressKeyUp)(WORD vKey, BOOL delay);
 	void (*SpinUpCDDrive)();
+	int (*ReplaceSubStrings)(TCHAR *dest, size_t destSize, TCHAR *src, TCHAR *searchStr, TCHAR *replaceStr);
+	DWORD (*GetFileCRC)(TCHAR *filePath);
 };
 
 #endif

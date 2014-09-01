@@ -423,7 +423,7 @@ TCHAR *trimWhiteSpace(TCHAR *inputStr);
 TCHAR *RemoveWhiteSpace(TCHAR *inStr, TCHAR *outStr);
 HFONT CreateFixedFont();
 void AssignPluginCallbacks(PluginCallbacks *callbacks);
-BOOL GetFileSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
+BOOL GetFileSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle, TCHAR *initialDir, TCHAR *filter);
 BOOL GetFolderSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
 int removeFolder(TCHAR *dir);
 void AddHistoryString(LinkedList *history, TCHAR *newStr, BOOL addToFront);
@@ -441,6 +441,7 @@ HFONT CreateDialogFont(TCHAR *name, double size, int weight);
 HFONT CreateWindowFont(TCHAR *name, int height, int weight);
 BOOL ReplaceLinesInFile(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int numSearches);
 BOOL AddLinesToFile(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int numSearches);
+int ReplaceSubStrings(TCHAR *dest, size_t destSize, TCHAR *src, TCHAR *searchStr, TCHAR *replaceStr);
 BOOL ExecuteCmd(TCHAR *cmd);
 BOOL ExecuteCmdEx(TCHAR *cmd, TCHAR *dir, BOOL bWait);
 void CentreWindow(HWND hWnd);
@@ -450,5 +451,6 @@ void PrintWindowNameAndClass();
 LRESULT CALLBACK DisableMainWndProc(int nCode, WPARAM wParam, LPARAM lParam);
 BOOL EncryptString(TCHAR *decPass, uint8_t *encPass, int *encPassSize);
 BOOL DecryptString(TCHAR *decPass, uint8_t *encPass, int encPassSize);
+DWORD GetFileCRC(TCHAR *filePath);
 
 #endif

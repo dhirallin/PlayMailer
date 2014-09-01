@@ -380,6 +380,14 @@ END:
 	return (int) msg.wParam;
 }
 
+DWORD GetFileCRC(TCHAR *filePath)
+{
+	DWORD checkSum, headerSum;
+
+	MapFileAndCheckSum(filePath, &headerSum, &checkSum);
+	return checkSum;
+}
+
 BOOL EncryptString(TCHAR *decStr, uint8_t *encStr, int *encStrSize)
 {
 	DATA_BLOB DataIn;
@@ -3937,7 +3945,7 @@ TCHAR *getCurrentPlayerFactionName(SessionInfo *session)
 	return getFactionName(session, session->currentPlayer);
 }
 
-BOOL GetFileSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle)
+BOOL GetFileSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle, TCHAR *initialDir, TCHAR *filter)
 {
 	OPENFILENAME ofn;
 	szBuf[0] = L'\0';
@@ -3950,11 +3958,15 @@ BOOL GetFileSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle)
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = hWnd;
 	ofn.lpstrTitle = szTitle;
-	ofn.lpstrFilter = L"All Files (*.*)\0*.*\0";
+	if(filter != NULL)
+		ofn.lpstrFilter = filter;
+	else
+		ofn.lpstrFilter = L"All Files (*.*)\0*.*\0";
 	ofn.lpstrFile = szBuf;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = NULL;
 	ofn.lpstrDefExt = L"";
+	ofn.lpstrInitialDir = initialDir;
 	ret = GetOpenFileName(&ofn);
 	
 	SetCurrentDirectory(currentDir);
@@ -6362,11 +6374,13 @@ void LoadSessionList()
 					continue;
 				}
 
-				session = AllocSession(gameID);
-				session->LoadGameSettings(setting);
+				if(!ConfigError)
+				{
+					session = AllocSession(gameID);
+					session->LoadGameSettings(setting);
+					ConfigError = FALSE;
+				}
 			}
-			else
-				ConfigError = TRUE;
 
 			if(!ConfigError)
 			{
@@ -7543,10 +7557,12 @@ SessionInfo *ParseEmailSessionText(TCHAR *text, size_t textSize)
 		}
 		session = AllocSession(gameID);
 
-		session->ParseEmailGameSettings(setting);
+		if(!ConfigError)
+		{
+			session->ParseEmailGameSettings(setting);
+			ConfigError = FALSE;
+		}
 	}
-	else 
-		ConfigError = TRUE;
 
 	if(!ConfigError)
 	{
@@ -9220,6 +9236,25 @@ BOOL AddLinesToFile(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int
 	fclose(destFile);
 
 	return TRUE;
+}
+
+int ReplaceSubStrings(TCHAR *dest, size_t destSize, TCHAR *src, TCHAR *searchStr, TCHAR *replaceStr)
+{
+	TCHAR *ss;
+	int count = 0;
+	
+	ss = StrStrI(src, searchStr);
+	while(ss != NULL)
+	{
+		count++;
+		wcsncat_s(dest, destSize, src, ss - src);
+		wcscat_s(dest, destSize, replaceStr);
+		src = ss + wcslen(searchStr);
+		ss = StrStrI(src, searchStr);
+	}
+	wcscat_s(dest, destSize, src);
+
+	return count;
 }
 
 BOOL ReplaceLinesInFile(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int numSearches)

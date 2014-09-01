@@ -74,7 +74,7 @@ INT_PTR CALLBACK GGChessTitansSettings::GGDialogProc(HWND hDialog, UINT message,
 		{	
 			case IDC_RUNCOMMAND_BUTTON:
 				swprintf(mbBuffer, MBBUFFER_SIZE, L"Please select your %s executable file or launcher application.", ggSettings->gameID);
-				if(pGetFileSelection(GetParent(hDialog), tempPathStr, mbBuffer))
+				if(pGetFileSelection(GetParent(hDialog), tempPathStr, mbBuffer, NULL, NULL))
 				{
 					swprintf(quotedTempPathStr, MAX_PATH, L"\"%s\"", tempPathStr);
 					SendDlgItemMessage(hDialog, IDC_RUNCOMMAND_EDIT, WM_SETTEXT, 0, (LPARAM)quotedTempPathStr);

@@ -5,7 +5,7 @@
 #include "data_structures.h"
 
 BOOL (*pGetFolderSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
-BOOL (*pGetFileSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
+BOOL (*pGetFileSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle, TCHAR *initialDir, TCHAR *filter);
 HFONT (*pCreateDialogFont)(TCHAR *name, double size, int weight);
 TCHAR mbBuffer[MBBUFFER_SIZE];
 
@@ -164,7 +164,7 @@ INT_PTR CALLBACK GlobalGameSettings::GGDialogProc(HWND hDialog, UINT message, WP
 				break;
 			case IDC_RUNCOMMAND_BUTTON:
 				swprintf(mbBuffer, MBBUFFER_SIZE, L"Please select your %s executable file or launcher application.", ggSettings->gameID);
-				if(pGetFileSelection(GetParent(hDialog), tempPathStr, mbBuffer))
+				if(pGetFileSelection(GetParent(hDialog), tempPathStr, mbBuffer, NULL, NULL))
 				{
 					swprintf(quotedTempPathStr, MAX_PATH, L"\"%s\"", tempPathStr);
 					SendDlgItemMessage(hDialog, IDC_RUNCOMMAND_EDIT, WM_SETTEXT, 0, (LPARAM)quotedTempPathStr);

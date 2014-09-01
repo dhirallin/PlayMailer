@@ -7,7 +7,7 @@
 class SessionInfo;
 
 extern BOOL (*pGetFolderSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
-extern BOOL (*pGetFileSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
+extern BOOL (*pGetFileSelection)(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle, TCHAR *initialDir, TCHAR *filter);
 extern HFONT (*pCreateDialogFont)(TCHAR *name, double size, int weight);
 extern HWND hGameSettingsDialog, hGGChildDialog;
 
@@ -123,6 +123,7 @@ public:
 
 	GameSettings *pGameSettings;
 	GlobalGameSettings *ggSettings;
+	TCHAR sessionRunCommand[MAX_PATH];
 	
 	virtual DLGPROC GetTeamSettingsDialogProc() { return NULL; }
 	virtual GameSettings *GetGameSettings() { return NULL; };	
@@ -159,6 +160,8 @@ public:
 	virtual void PreSaveGameEvent();
 	virtual void PreNewGameEvent();
 	virtual void PostNewGameEvent();
+	virtual void PreLoadGameEvent() {};
+	virtual void PostLoadGameEvent() {};
 	virtual void ToggleFullScreen();
 	virtual Team *AllocTeam() { return NULL; }
 	virtual void FreeTeam(Team *team);
@@ -173,6 +176,7 @@ public:
 		
 		this->MAX_TEAMS = ggSettings->MAX_TEAMS;
 		this->NUM_FACTIONS = ggSettings->NUM_FACTIONS;
+		this->sessionRunCommand[0] = L'\0';
 
 		InitGameSettings();
 		

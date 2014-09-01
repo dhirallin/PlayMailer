@@ -523,9 +523,9 @@ INT_PTR CALLBACK GAlienCrossfire::GameSettingsDialogProc(HWND hDialog, UINT mess
 			if(LOWORD(wParam) == IDC_BROWSE_MAP_FILE_BUTTON)
 			{
 				pathStr[0] = 0;
-				if(pGetFileSelection(GetParent(hDialog), pathStr, L"Please select a map file."))
+				if(pGetFileSelection(GetParent(hDialog), pathStr, L"Please select a map file.", NULL, NULL))
 				{
-					if(pMapFile = wcsrchr(mbBuffer, L'\\'))
+					if(pMapFile = wcsrchr(pathStr, L'\\'))
 						pMapFile++;
 					else
 						pMapFile = pathStr;

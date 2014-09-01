@@ -72,6 +72,7 @@ int GGWarlordsSettings::GetNumConfigReplaceStrings()
 INT_PTR CALLBACK GWarlords::GameSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static SessionInfo *session;
+	TCHAR pathStr[MAX_PATH];
 
 	switch(message)
 	{
@@ -79,7 +80,48 @@ INT_PTR CALLBACK GWarlords::GameSettingsDialogProc(HWND hDialog, UINT message, W
 			session = (SessionInfo *)lParam;
 			return TRUE;
 		case WM_COMMAND:
-			if(HIWORD(wParam) == BN_CLICKED) 
+			if(LOWORD(wParam) == IDC_SCENARIOPATH_BUTTON)
+			{
+				if(IsDlgButtonChecked(hDialog, IDC_SCENARIO_WLED_RADIO))
+				{
+					pathStr[0] = 0;
+					if(pGetFileSelection(GetParent(hDialog), pathStr, L"Select a WLED Rescue File (.WL)", NULL, L"WLED Rescue Files (*.WL)\0*.WL\0"))
+					{
+						SendDlgItemMessage(hDialog, IDC_SCENARIOPATH_EDIT, WM_SETTEXT, 0, (LPARAM)pathStr);
+					}
+				}
+				else
+				{
+					BOOL found = FALSE;
+					while(!found)
+					{
+						if(!pGetFolderSelection(GetParent(hDialog), pathStr, L"Select a folder containing your WLEDIT scenario files (.WL0)"))
+							break;
+						
+						HANDLE hFile;
+						WIN32_FIND_DATA fileData;
+						
+						if(pathStr[wcslen(pathStr) - 1] != L'\\')
+							wcscat_s(pathStr, MAX_PATH, L"\\");
+						
+						wcscat_s(pathStr, MAX_PATH, L"*.WL0");
+						if((hFile = FindFirstFile(pathStr, &fileData)) != INVALID_HANDLE_VALUE)
+						{
+							found = TRUE;
+							wcsrchr(pathStr, L'*')[0] = L'\0';
+							SendDlgItemMessage(hDialog, IDC_SCENARIOPATH_EDIT, WM_SETTEXT, 0, (LPARAM)pathStr);
+							FindClose(hFile);	
+						}
+						
+						if(!found)
+						{
+							if(IDCANCEL == MessageBox(GetParent(hDialog), L"No .WL0 files were found in the selected folder. Please try again.", L"WLEDIT files not found", MB_OKCANCEL | MB_ICONEXCLAMATION))
+								break;
+						}
+					}
+				}
+			}
+			else if(HIWORD(wParam) == BN_CLICKED) 
 				GWarlords::UpdateGameSettingsDialog(hDialog);
 			break;
 		default:
@@ -259,9 +301,15 @@ void GWarlords::InitGameSettingsDialog()
 	CheckDlgButton(*PTR_hGameSettingsDialog, IDC_INTENSE_COMBAT_CHECK, game->intenseCombat);
 	
 	if(this->turnNumber > 1)
+	{
 		EnableWindow(GetDlgItem(*PTR_hGameSettingsDialog, IDC_DIFFICULTY_COMBO), FALSE);
+		EnableWindow(GetDlgItem(*PTR_hGameSettingsDialog, IDC_SCENARIO_NONE_RADIO), FALSE);
+		EnableWindow(GetDlgItem(*PTR_hGameSettingsDialog, IDC_SCENARIO_WLED_RADIO), FALSE);
+		EnableWindow(GetDlgItem(*PTR_hGameSettingsDialog, IDC_SCENARIO_WLEDIT_RADIO), FALSE);
+	}
 
 	SendDlgItemMessage(*PTR_hGameSettingsDialog, IDC_SCENARIO_NONE_RADIO + game->scenarioType, BM_SETCHECK, BST_CHECKED, 0);
+	SendDlgItemMessage(*PTR_hGameSettingsDialog, IDC_SCENARIOPATH_EDIT, WM_SETTEXT, 0, (LPARAM)game->scenarioPath);
 
 	UpdateGameSettingsDialog(*PTR_hGameSettingsDialog);
 }
@@ -292,6 +340,17 @@ BOOL GWarlords::ParseGameSettingsDialog()
 
 	game->difficulty = (uint8_t)SendDlgItemMessage(*PTR_hGameSettingsDialog, IDC_DIFFICULTY_COMBO, CB_GETCURSEL, 0, 0); 
 
+	if(!IsDlgButtonChecked(*PTR_hGameSettingsDialog, IDC_SCENARIO_NONE_RADIO))
+	{		
+		SendDlgItemMessage(*PTR_hGameSettingsDialog, IDC_SCENARIOPATH_EDIT, WM_GETTEXT, MAX_PATH, (LPARAM)game->scenarioPath);
+		if(IsDlgButtonChecked(*PTR_hGameSettingsDialog, IDC_SCENARIO_WLED_RADIO))
+			game->scenarioType = SCENARIO_WLED;
+		else
+			game->scenarioType = SCENARIO_WLEDIT;
+	}
+	else
+		game->scenarioType = SCENARIO_NONE;
+
 	return ValidateGameSettings(VALIDATE_GUI, 0);
 }
 
@@ -308,16 +367,7 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 	else if(type == VALIDATE_GUI)
 		hWnd = *PTR_hSessionSettingsDialog;
 
-	if(type != VALIDATE_EMAIL)
-	{
-		// Check save slot is valid
-		if(game->saveSlot < 1 || game->saveSlot > 8)
-		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"save_slot\" is out of range.", cfgError);
-			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
-			return FALSE;
-		}
-	}
+	trimWhiteSpace(game->scenarioPath);
 
 	if(game->difficulty >= NUM_DIFFICULTIES)
 	{
@@ -327,6 +377,60 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
+	}
+
+	if(game->scenarioType != SCENARIO_NONE && game->scenarioType != SCENARIO_WLED && game->scenarioType != SCENARIO_WLEDIT)
+	{
+		if(type != VALIDATE_EMAIL)
+		{
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_type\" is invalid type.", cfgError);
+			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
+		}
+		return FALSE;
+	}
+
+	if(type != VALIDATE_EMAIL)
+	{
+		// Check save slot is valid
+		if(game->saveSlot < 1 || game->saveSlot > 8)
+		{
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"save_slot\" is out of range.", cfgError);
+			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
+			return FALSE;
+		}
+
+		if(game->scenarioType == SCENARIO_WLED && 
+				(_waccess(game->scenarioPath, 0) || wcscmp(game->scenarioPath + wcslen(game->scenarioPath) - 3, L".WL")))
+		{
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_path\" is invalid. WLED Recovery File not found.", cfgError);
+			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
+			return FALSE;
+		}
+		else if(game->scenarioType == SCENARIO_WLEDIT)
+		{
+			if(_waccess(game->scenarioPath, 0))
+			{
+				swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_path\" is an invalid folder path.", cfgError);
+				MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
+				return FALSE;
+			}
+
+			HANDLE hFile;
+			WIN32_FIND_DATA fileData;
+									
+			if(game->scenarioPath[wcslen(game->scenarioPath) - 1] != L'\\')
+				wcscat_s(game->scenarioPath, MAX_PATH, L"\\");
+	
+			wcscat_s(game->scenarioPath, MAX_PATH, L"*.WL0");
+			if((hFile = FindFirstFile(game->scenarioPath, &fileData)) == INVALID_HANDLE_VALUE)
+			{
+				swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_path\" is invalid. The folder specified does not contain any WLEDIT .WL0 files.", cfgError);
+				MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
+				return FALSE;
+			}
+			wcsrchr(game->scenarioPath, L'*')[0] = L'\0';
+			FindClose(hFile);	
+		}
 	}
 
 	return TRUE;
@@ -352,6 +456,8 @@ void GWarlords::SaveGameSettings(config_setting_t *group)
 	cfgSetBool(group, L"computer_enhanced", this->gameSettings.enhanced);
 	cfgSetBool(group, L"intense_combat", this->gameSettings.intenseCombat);
 	cfgSetInt(group, L"settings_mask", this->gameSettings.settingsMask);
+	cfgSetInt(group, L"scenario_type", this->gameSettings.scenarioType);
+	cfgSetString(group, L"scenario_path", this->gameSettings.scenarioPath);
 }
 
 void GWarlords::LoadGameSettings(config_setting_t *group)
@@ -363,6 +469,8 @@ void GWarlords::LoadGameSettings(config_setting_t *group)
 	this->gameSettings.enhanced = cfgGetBool(group, L"computer_enhanced");
 	this->gameSettings.intenseCombat = cfgGetBool(group, L"intense_combat");
 	this->gameSettings.settingsMask = cfgGetInt(group, L"settings_mask");
+	this->gameSettings.scenarioType = cfgGetInt(group, L"scenario_type");
+	cfgGetString(group, L"scenario_path", this->gameSettings.scenarioPath);
 }
 
 void GWarlords::BuildEmailGameSettings(config_setting_t *group)
@@ -370,6 +478,7 @@ void GWarlords::BuildEmailGameSettings(config_setting_t *group)
 	cfgSetInt(group, L"computer_difficulty", this->gameSettings.difficulty);
 	cfgSetBool(group, L"computer_enhanced", this->gameSettings.enhanced);
 	cfgSetBool(group, L"intense_combat", this->gameSettings.intenseCombat);
+	cfgSetInt(group, L"scenario_type", this->gameSettings.scenarioType);
 }
 
 void GWarlords::ParseEmailGameSettings(config_setting_t *group)
@@ -377,6 +486,7 @@ void GWarlords::ParseEmailGameSettings(config_setting_t *group)
 	this->gameSettings.difficulty = cfgGetInt(group, L"computer_difficulty");
 	this->gameSettings.enhanced = cfgGetBool(group, L"computer_enhanced");
 	this->gameSettings.intenseCombat = cfgGetBool(group, L"intense_combat");
+	this->gameSettings.scenarioType = cfgGetInt(group, L"scenario_type");
 }
 
 void GWarlords::UpdateEmailGameSettings(SessionInfo *in)
@@ -386,6 +496,7 @@ void GWarlords::UpdateEmailGameSettings(SessionInfo *in)
 	this->gameSettings.enhanced = wIn->gameSettings.enhanced;
 	this->gameSettings.intenseCombat = wIn->gameSettings.intenseCombat;
 	this->gameSettings.difficulty = wIn->gameSettings.difficulty;
+	this->gameSettings.scenarioType = wIn->gameSettings.scenarioType;
 }
 
 BOOL GWarlords::ApplyGameSettings()
@@ -536,6 +647,128 @@ void GWarlords::ToggleSoundOff()
 	PressHotKey(VK_LMENU, VK_M);
 }
 
+void GWarlords::PreNewGameEvent()
+{
+	CheckForExternalScenario();
+}
 
+void GWarlords::PostNewGameEvent()
+{
 
+}
 
+void GWarlords::PreLoadGameEvent()
+{
+	CheckForExternalScenario();
+}
+
+void GWarlords::PostLoadGameEvent()
+{
+
+}
+
+void GWarlords::CheckForExternalScenario()
+{
+	TCHAR tempRunCommand[MAX_PATH], findPath[MAX_PATH], destCopy[MAX_PATH], srcCopy[MAX_PATH];
+	HANDLE hFile;
+	WIN32_FIND_DATA fileData;
+	
+	sessionRunCommand[0] = L'\0';
+
+	if(gameSettings.scenarioType == SCENARIO_WLEDIT)
+	{
+		swprintf(destCopy, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
+		if(_waccess(destCopy, 0))
+		{
+			for(int i = 0; i < ggSettings->GetNumGameExeNames(); i++)
+			{
+				swprintf(srcCopy, MAX_PATH, L"%s%s", ggSettings->gameFolderPath, ggSettings->GetGameExeNameList()[i]);
+				if(!_waccess(srcCopy, 0))
+				{
+					if(!CopyFile(srcCopy, destCopy, TRUE))
+					{
+						int j = GetLastError();
+					}
+					break;
+				}
+			}
+		}
+	
+		if(CalculateWLEditCRC(gameSettings.scenarioPath) != CalculateWLEditCRC(ggSettings->gameFolderPath))
+		{
+			// Remove old WLEdit files from game folder.
+			wcscpy_s(findPath, MAX_PATH, ggSettings->gameFolderPath);
+			wcscat_s(findPath, MAX_PATH, L"*.WL0");
+			
+			if((hFile = FindFirstFile(findPath, &fileData)) != INVALID_HANDLE_VALUE)
+			{
+				do		
+				{
+					swprintf(srcCopy, MAX_PATH, L"%s%s", ggSettings->gameFolderPath, fileData.cFileName);
+					DeleteFile(srcCopy);
+				} while(FindNextFile(hFile, &fileData));
+				FindClose(hFile);
+			}
+			swprintf(srcCopy, MAX_PATH, L"%s%s", ggSettings->gameFolderPath, L"WL_STRAT.PCK");
+			if(!_waccess(srcCopy, 0))
+				DeleteFile(srcCopy);
+
+			// Copy WLEdit files to game folder.
+			wcscpy_s(findPath, MAX_PATH, gameSettings.scenarioPath);
+			wcscat_s(findPath, MAX_PATH, L"*.WL0");
+
+			if((hFile = FindFirstFile(findPath, &fileData)) != INVALID_HANDLE_VALUE)
+			{
+				do		
+				{
+					swprintf(srcCopy, MAX_PATH, L"%s%s", gameSettings.scenarioPath, fileData.cFileName);
+					swprintf(destCopy, MAX_PATH, L"%s%s", ggSettings->gameFolderPath, fileData.cFileName);
+					CopyFile(srcCopy, destCopy, TRUE);
+				} while(FindNextFile(hFile, &fileData));
+				FindClose(hFile);
+			}
+			
+			swprintf(srcCopy, MAX_PATH, L"%s%s", gameSettings.scenarioPath, L"WL_STRAT.PCK");
+			if(!_waccess(srcCopy, 0))
+			{
+				swprintf(destCopy, MAX_PATH, L"%s%s", ggSettings->gameFolderPath, L"WL_STRAT.PCK");
+				CopyFile(srcCopy, destCopy, TRUE);
+			}
+		}	
+
+		wcscpy_s(sessionRunCommand, MAX_PATH, ggSettings->runCommand);
+		for(int i = 0; i < ggSettings->GetNumGameExeNames(); i++)
+		{
+			wcscpy_s(tempRunCommand, MAX_PATH, sessionRunCommand);
+			sessionRunCommand[0] = L'\0';
+			ReplaceSubStrings(sessionRunCommand, MAX_PATH, tempRunCommand, ggSettings->GetGameExeNameList()[i], L"WL.EXE");
+		}
+	}		
+}
+
+DWORD GWarlords::CalculateWLEditCRC(TCHAR *folderPath)
+{
+	HANDLE hFile;
+	WIN32_FIND_DATA fileData;
+	TCHAR findPath[MAX_PATH], filePath[MAX_PATH];	
+	DWORD CRC = 0;
+	
+	wcscpy_s(findPath, MAX_PATH, folderPath);
+	wcscat_s(findPath, MAX_PATH, L"*.WL0");
+	
+	if((hFile = FindFirstFile(findPath, &fileData)) == INVALID_HANDLE_VALUE)
+		return 0;
+	
+	do
+	{
+		swprintf(filePath, MAX_PATH, L"%s%s", folderPath, fileData.cFileName);
+		CRC ^= GetFileCRC(filePath);
+	} while(FindNextFile(hFile, &fileData));
+	FindClose(hFile);	
+
+	swprintf(filePath, MAX_PATH, L"%s%s", folderPath, L"WL_STRAT.PCK");
+	if(!_waccess(filePath, 0))
+		CRC ^= GetFileCRC(filePath);
+
+	return CRC;
+}
