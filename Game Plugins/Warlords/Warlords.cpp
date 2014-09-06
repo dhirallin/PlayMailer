@@ -10,6 +10,9 @@ const int GWarlords::SCENARIO_NONE		= 0;
 const int GWarlords::SCENARIO_WLED		= 1;
 const int GWarlords::SCENARIO_WLEDIT	= 2;
 
+const int GWarlords::VERSION_210		= 0;
+const int GWarlords::VERSION_PRE210		= 1;
+
 TCHAR *GWarlords::FactionNames[] = {L"The Sirians", L"Storm Giants", L"Grey Dwarves", L"Orcs of Kor", L"Elvallie", L"The Selentines", L"Horse Lords", L"Lord Bane"}; 
 
 const int GWarlords::NUM_DIFFICULTIES	= 4;
@@ -20,6 +23,12 @@ int GGWarlordsSettings::NUM_GAME_EXE_NAMES = 2;
 
 SearchReplace GGWarlordsSettings::ConfigReplaceStrings[] = {L"aspect=", L"aspect=true"};
 int GGWarlordsSettings::NUM_CONFIG_REPLACE_STRINGS = 1;
+
+TCHAR *GWarlords::WLEDFilesV210[] = {L"WARLORDS.EXE", L"ILLURIA.MAP", L"PICTS\\STRAT.PCK", L"PICTS\\ESTRAT.PCK"};
+const int GWarlords::NumWLEDFilesV210 = 4;
+
+TCHAR *GWarlords::WLEDFilesPreV210[] = {L"WARLORDS.EXE", L"ILLURIA.MAP", L"STRAT.LBM", L"ESTRAT.LBM"};
+const int GWarlords::NumWLEDFilesPreV210 = 4;
 
 TCHAR **GGWarlordsSettings::GetGameExeNameList()
 {
@@ -51,12 +60,14 @@ void GGWarlordsSettings::LoadSettings(config_setting_t *group)
 {
 	lastObserveState = cfgGetBool(group, L"last_observe_state");
 	lastSoundState = cfgGetBool(group, L"last_sound_state");
+	lastScenarioCRC = cfgGetInt(group, L"last_scenario_crc");
 }
 
 void GGWarlordsSettings::SaveSettings(config_setting_t *group)
 {
 	cfgSetBool(group, L"last_observe_state", lastObserveState);
 	cfgSetBool(group, L"last_sound_state", lastSoundState);
+	cfgSetInt(group, L"last_scenario_crc", lastScenarioCRC);
 }
 
 SearchReplace *GGWarlordsSettings::GetConfigReplaceStrings()
@@ -276,7 +287,7 @@ BOOL GWarlords::SaveGame()
 	
 	StartSaveFileThread(this);
 	PressKey(VK_RETURN);
-	return WaitForSaveFileThread();
+	return WaitForWriteFileThread();
 }
 
 void GWarlords::InitGameSettingsDialog()
@@ -457,6 +468,7 @@ void GWarlords::SaveGameSettings(config_setting_t *group)
 	cfgSetBool(group, L"intense_combat", this->gameSettings.intenseCombat);
 	cfgSetInt(group, L"settings_mask", this->gameSettings.settingsMask);
 	cfgSetInt(group, L"scenario_type", this->gameSettings.scenarioType);
+	cfgSetInt(group, L"scenario_crc", this->gameSettings.scenarioCRC);
 	cfgSetString(group, L"scenario_path", this->gameSettings.scenarioPath);
 }
 
@@ -470,6 +482,7 @@ void GWarlords::LoadGameSettings(config_setting_t *group)
 	this->gameSettings.intenseCombat = cfgGetBool(group, L"intense_combat");
 	this->gameSettings.settingsMask = cfgGetInt(group, L"settings_mask");
 	this->gameSettings.scenarioType = cfgGetInt(group, L"scenario_type");
+	this->gameSettings.scenarioCRC = cfgGetInt(group, L"scenario_crc");
 	cfgGetString(group, L"scenario_path", this->gameSettings.scenarioPath);
 }
 
@@ -647,9 +660,9 @@ void GWarlords::ToggleSoundOff()
 	PressHotKey(VK_LMENU, VK_M);
 }
 
-void GWarlords::PreNewGameEvent()
+BOOL GWarlords::PreNewGameEvent()
 {
-	CheckForExternalScenario();
+	return CheckForExternalScenario();
 }
 
 void GWarlords::PostNewGameEvent()
@@ -657,9 +670,9 @@ void GWarlords::PostNewGameEvent()
 
 }
 
-void GWarlords::PreLoadGameEvent()
+BOOL GWarlords::PreLoadGameEvent()
 {
-	CheckForExternalScenario();
+	return CheckForExternalScenario();
 }
 
 void GWarlords::PostLoadGameEvent()
@@ -667,16 +680,29 @@ void GWarlords::PostLoadGameEvent()
 
 }
 
-void GWarlords::CheckForExternalScenario()
+BOOL GWarlords::CheckForExternalScenario()
 {
 	TCHAR tempRunCommand[MAX_PATH], findPath[MAX_PATH], destCopy[MAX_PATH], srcCopy[MAX_PATH];
+	TCHAR *v210BackupPath = L"V210\\", *preV210BackupPath = L"PreV210\\", backupPath[MAX_PATH], fileStorePath[MAX_PATH];
+	TCHAR *pExeName, *WLEDExeName = L"WARLORDS.EXE", *WLEditExeName = L"WL.EXE";
 	HANDLE hFile;
 	WIN32_FIND_DATA fileData;
+	DWORD oldCRC, newCRC;
+	BOOL killGame = FALSE;
+	GGWarlordsSettings *ggSettings = (GGWarlordsSettings *)this->ggSettings;
 	
 	sessionRunCommand[0] = L'\0';
+	
+	// Create backup path for this version of Warlords
+	GetGGFileStorePath(ggSettings, backupPath);
+	if(VERSION_210 == GetWarlordsVersion(ggSettings->gameFolderPath))
+		wcscat_s(backupPath, MAX_PATH, v210BackupPath);
+	else
+		wcscat_s(backupPath, MAX_PATH, preV210BackupPath);
 
-	if(gameSettings.scenarioType == SCENARIO_WLEDIT)
+	if(gameSettings.scenarioType == SCENARIO_WLED || gameSettings.scenarioType == SCENARIO_WLEDIT)
 	{
+		// If Warlords exe has alternative name, copy to WARLORDS.EXE
 		swprintf(destCopy, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
 		if(_waccess(destCopy, 0))
 		{
@@ -685,16 +711,44 @@ void GWarlords::CheckForExternalScenario()
 				swprintf(srcCopy, MAX_PATH, L"%s%s", ggSettings->gameFolderPath, ggSettings->GetGameExeNameList()[i]);
 				if(!_waccess(srcCopy, 0))
 				{
-					if(!CopyFile(srcCopy, destCopy, TRUE))
-					{
-						int j = GetLastError();
-					}
+					CopyFile(srcCopy, destCopy, TRUE);
 					break;
 				}
 			}
 		}
-	
-		if(CalculateWLEditCRC(gameSettings.scenarioPath) != CalculateWLEditCRC(ggSettings->gameFolderPath))
+
+		if(gameSettings.scenarioType == SCENARIO_WLED)
+			pExeName = WLEDExeName;
+		else
+			pExeName = WLEditExeName;
+
+		wcscpy_s(sessionRunCommand, MAX_PATH, ggSettings->runCommand);
+		for(int i = 0; i < ggSettings->GetNumGameExeNames(); i++)
+		{
+			wcscpy_s(tempRunCommand, MAX_PATH, sessionRunCommand);
+			sessionRunCommand[0] = L'\0';
+			ReplaceSubStrings(sessionRunCommand, MAX_PATH, tempRunCommand, ggSettings->GetGameExeNameList()[i], pExeName);
+		}
+	}
+
+	if(gameSettings.scenarioType == SCENARIO_NONE || gameSettings.scenarioType == SCENARIO_WLEDIT)
+	{
+		// Restore clean Warlords files if necessary
+		if(CopyWLEDFiles(backupPath, ggSettings->gameFolderPath, FALSE, TRUE))
+			killGame = TRUE;
+	}
+
+	if(gameSettings.scenarioType == SCENARIO_WLEDIT)
+	{
+		newCRC = CalculateWLEditCRC(gameSettings.scenarioPath);
+		oldCRC = CalculateWLEditCRC(ggSettings->gameFolderPath);
+		
+		if(ggSettings->lastScenarioCRC != newCRC || oldCRC != newCRC)
+			ggSettings->KillGame();
+		ggSettings->lastScenarioCRC = newCRC;
+		SaveGlobalGameSettings();
+
+		if(newCRC != oldCRC)
 		{
 			// Remove old WLEdit files from game folder.
 			wcscpy_s(findPath, MAX_PATH, ggSettings->gameFolderPath);
@@ -735,15 +789,214 @@ void GWarlords::CheckForExternalScenario()
 				CopyFile(srcCopy, destCopy, TRUE);
 			}
 		}	
-
-		wcscpy_s(sessionRunCommand, MAX_PATH, ggSettings->runCommand);
-		for(int i = 0; i < ggSettings->GetNumGameExeNames(); i++)
-		{
-			wcscpy_s(tempRunCommand, MAX_PATH, sessionRunCommand);
-			sessionRunCommand[0] = L'\0';
-			ReplaceSubStrings(sessionRunCommand, MAX_PATH, tempRunCommand, ggSettings->GetGameExeNameList()[i], L"WL.EXE");
-		}
 	}		
+	else
+	{
+		if(killGame || ggSettings->lastScenarioCRC != 0)
+			ggSettings->KillGame();
+		ggSettings->lastScenarioCRC = 0;
+		SaveGlobalGameSettings();
+	}
+
+	if(gameSettings.scenarioType == SCENARIO_WLED)
+	{			
+		// Backup clean Warlords files
+		_wmkdir(FILE_STORE_FOLDER);
+		GetGGFileStorePath(ggSettings, destCopy);
+		_wmkdir(destCopy);
+		_wmkdir(backupPath);
+		CopyWLEDFiles(ggSettings->gameFolderPath, backupPath, TRUE, FALSE);
+				
+		/* Check if we need to run WLED here */
+		if(gameSettings.scenarioCRC != GetFileCRC(gameSettings.scenarioPath))
+		{
+			ggSettings->KillGame();
+			
+			// Run WLED.EXE and patch Warlords files
+			if(!RunWLED())
+				return FALSE;
+
+			// Copy patched files to file store
+			GetSessionFileStorePath(this, fileStorePath);	
+			_wmkdir(fileStorePath);
+			DeleteWLEDFiles(fileStorePath);
+			CopyWLEDFiles(ggSettings->gameFolderPath, fileStorePath, FALSE, FALSE);
+			
+			// Save CRC of Rescue file
+			gameSettings.scenarioCRC = GetFileCRC(gameSettings.scenarioPath);
+			SaveSessionList();
+		}
+		else
+		{
+			GetSessionFileStorePath(this, srcCopy);
+			if(!CompareWLEDCRCs(ggSettings->gameFolderPath, srcCopy))
+			{
+				ggSettings->KillGame();
+				CopyWLEDFiles(srcCopy, ggSettings->gameFolderPath, FALSE, FALSE);
+			}
+		}
+	}
+
+	return TRUE;
+}
+
+int GWarlords::GetWarlordsVersion(TCHAR *folderPath)
+{
+	TCHAR filePath[MAX_PATH];
+
+	swprintf(filePath, MAX_PATH, L"%sPICTS", folderPath);
+	if(!_waccess(filePath, 0))
+		return VERSION_210;
+	else
+		return VERSION_PRE210;
+}
+
+BOOL GWarlords::CompareWLEDCRCs(TCHAR *folderPath1, TCHAR *folderPath2)
+{
+	TCHAR filePath1[MAX_PATH], filePath2[MAX_PATH];
+	
+	if(VERSION_210 == GetWarlordsVersion(folderPath1))
+	{
+		// Version 2.10
+		for(int i = 0; i < NumWLEDFilesV210; i++)
+		{
+			swprintf(filePath1, MAX_PATH, L"%s%s", folderPath1, WLEDFilesV210[i]);
+			swprintf(filePath2, MAX_PATH, L"%s%s", folderPath2, WLEDFilesV210[i]);
+			if(GetFileCRC(filePath1) != GetFileCRC(filePath2))
+				return FALSE;
+		}
+	}
+	else
+	{
+		// Pre version 2.10
+		for(int i = 0; i < NumWLEDFilesPreV210; i++)
+		{
+			swprintf(filePath1, MAX_PATH, L"%s%s", folderPath1, WLEDFilesPreV210[i]);
+			swprintf(filePath2, MAX_PATH, L"%s%s", folderPath2, WLEDFilesPreV210[i]);
+			if(GetFileCRC(filePath1) != GetFileCRC(filePath2))
+				return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+void GWarlords::DeleteWLEDFiles(TCHAR *folderPath)
+{
+	TCHAR filePath[MAX_PATH];
+
+	for(int i = 0; i < NumWLEDFilesV210; i++)
+	{
+		swprintf(filePath, MAX_PATH, L"%s%s", folderPath, WLEDFilesV210[i]);
+		DeleteFile(filePath);
+	}
+	swprintf(filePath, MAX_PATH, L"%sPICTS", folderPath);
+	RemoveDirectory(filePath);
+
+	for(int i = 0; i < NumWLEDFilesPreV210; i++)
+	{
+		swprintf(filePath, MAX_PATH, L"%s%s", folderPath, WLEDFilesPreV210[i]);
+		DeleteFile(filePath);
+	}
+}
+
+int GWarlords::CopyWLEDFiles(TCHAR *srcFolderPath, TCHAR *destFolderPath, BOOL bFailIfExists, BOOL bCheckCRC)
+{
+	TCHAR srcCopy[MAX_PATH], destCopy[MAX_PATH];
+	int filesCopied = 0;
+
+	if(VERSION_210 == GetWarlordsVersion(srcFolderPath))
+	{
+		// Version 2.10
+		
+		swprintf(destCopy, MAX_PATH, L"%sPICTS\\", destFolderPath);
+		_wmkdir(destCopy);
+
+		for(int i = 0; i < NumWLEDFilesV210; i++)
+		{
+			swprintf(srcCopy, MAX_PATH, L"%s%s", srcFolderPath, WLEDFilesV210[i]);
+			swprintf(destCopy, MAX_PATH, L"%s%s", destFolderPath, WLEDFilesV210[i]);
+			if(!bCheckCRC || GetFileCRC(srcCopy) != GetFileCRC(destCopy))
+			{	
+				if(CopyFile(srcCopy, destCopy, bFailIfExists))
+					filesCopied++;
+			}				
+		}
+	}
+	else
+	{
+		// Pre version 2.10
+		
+		for(int i = 0; i < NumWLEDFilesPreV210; i++)
+		{
+			swprintf(srcCopy, MAX_PATH, L"%s%s", srcFolderPath, WLEDFilesPreV210[i]);
+			swprintf(destCopy, MAX_PATH, L"%s%s", destFolderPath, WLEDFilesPreV210[i]);
+			if(!bCheckCRC || GetFileCRC(srcCopy) != GetFileCRC(destCopy))
+			{
+				if(CopyFile(srcCopy, destCopy, bFailIfExists))
+					filesCopied++;
+			}	
+		}
+	}
+
+	return filesCopied;
+}
+
+BOOL GWarlords::RunWLED()
+{
+	TCHAR runPath[MAX_PATH], exePath[MAX_PATH], scenarioPath[MAX_PATH], *DOSBox;
+	DWORD runDelay;
+	BOOL ret = TRUE;
+
+	// Clear read-only permission on WARLORDS.EXE
+	swprintf(exePath, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
+	SetFileAttributes(exePath, GetFileAttributes(exePath) & ~FILE_ATTRIBUTE_READONLY);
+	
+	// Copy WLED Rescue file to game folder
+	swprintf(scenarioPath, MAX_PATH, L"%sPLAYMAIL.WL", ggSettings->gameFolderPath);
+	CopyFile(gameSettings.scenarioPath, scenarioPath, FALSE);
+
+	if(!(DOSBox = GetDOSBoxPath(ggSettings->gameID)))
+		return FALSE;
+
+	swprintf(runPath, MAX_PATH, L"%sWLED.EXE", ggSettings->gameFolderPath); 
+	if(_waccess(runPath, 0))
+	{
+		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run \'%s\'.", runPath);
+		MessageBoxS(NULL, mbBuffer, L"Error running WLED", MB_OK | MB_ICONERROR);
+		return FALSE;
+	}
+
+	swprintf(runPath, MAX_PATH, L"%sWLED.INI", ggSettings->gameFolderPath);
+	if(_waccess(runPath, 0))
+		runDelay = 15 * SECONDS;
+	else
+		runDelay = 6 * SECONDS;
+
+	swprintf(runPath, MAX_PATH, L"\"%s\" -c \"mount C: \'%s\'\" -c \"C:\" -c \"WLED.EXE PLAYMAIL.WL\"", DOSBox, ggSettings->gameFolderPath);
+	//swprintf(runPath, MAX_PATH, L"\"%s\" \"%sWLED.EXE\"", DOSBox, ggSettings->gameFolderPath);
+	if(!BringProgramToFront(runPath, NULL, ggSettings, NULL, NULL, runDelay))
+		return FALSE;
+
+	DisableInput(TRUE);
+
+	PressHotKey(VK_LSHIFT, VK_F3);
+	SleepC(500);
+	StartWriteFileThread(exePath);
+	PressKey(VK_RETURN);
+	if(!WaitForWriteFileThread())
+		ret = FALSE;
+	
+	PressKey(VK_F10);
+	SleepC(500);
+	ggSettings->KillGame();
+	DisableInput(FALSE);
+	DeleteFile(scenarioPath);
+	
+	if(!ret)
+		MessageBoxS(NULL, L"Error patching game files in WLED. Make sure you are using a supported version of Warlords such as v2.10.", L"Error patching game files.", MB_OK | MB_ICONERROR);
+	
+	return ret;
 }
 
 DWORD GWarlords::CalculateWLEditCRC(TCHAR *folderPath)

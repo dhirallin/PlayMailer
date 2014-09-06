@@ -453,19 +453,23 @@ BOOL Game::EnterFullScreen()
 	return TRUE;
 }
 
-void Game::PreSaveGameEvent()
+BOOL Game::PreSaveGameEvent()
 {
 	HWND hWnd = GetForegroundWindow();
 	ggSettings->SetMouseModifier(hWnd);
+
+	return TRUE;
 }
 
-void Game::PreNewGameEvent()
+BOOL Game::PreNewGameEvent()
 {
 	if(ggSettings->WarnBeforeNewGame)
 	{
 		swprintf(mbBuffer, MBBUFFER_SIZE, L"After you press OK, PlayMailer will begin setting up a new game within %s. Please do not use your mouse or keyboard until setup is complete.", this->ggSettings->gameID);
 		MessageBoxS(NULL, mbBuffer, L"Prepare for Setup", MB_OK);
 	}
+
+	return TRUE;
 }
 
 void Game::PostNewGameEvent()

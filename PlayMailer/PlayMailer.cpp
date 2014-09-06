@@ -384,7 +384,9 @@ DWORD GetFileCRC(TCHAR *filePath)
 {
 	DWORD checkSum, headerSum;
 
-	MapFileAndCheckSum(filePath, &headerSum, &checkSum);
+	if(CHECKSUM_SUCCESS != MapFileAndCheckSum(filePath, &headerSum, &checkSum))
+		return 0;
+
 	return checkSum;
 }
 
@@ -3997,8 +3999,8 @@ BOOL GetFolderSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle)
 int removeFolder(TCHAR *dir) 
 {
   int len = wcslen(dir) + 2; // required to set 2 nulls at end of argument to SHFileOperation.
-  TCHAR *tempdir = (TCHAR*) malloc(len * sizeof(TCHAR));
-  memset(tempdir,0,len);
+  TCHAR *tempdir = (TCHAR *)malloc(len * sizeof(TCHAR));
+  memset(tempdir, 0, len);
   wcscpy_s(tempdir, len, dir);
 
   SHFILEOPSTRUCT file_op = {
@@ -4694,6 +4696,28 @@ BOOL CheckGameSaved(SessionInfo *session, TCHAR *exportSave, TCHAR *importSave)
 	}
 
 	return TRUE;
+}
+
+void DeleteSessionFileStore(SessionInfo *session)
+{
+	TCHAR storePath[MAX_PATH];
+
+	GetSessionFileStorePath(session, storePath);
+	removeFolder(storePath);
+}
+
+TCHAR *GetSessionFileStorePath(SessionInfo *session, TCHAR *path)
+{
+	swprintf(path, MAX_PATH, L"%s\\%s\\%lu\\", FILE_STORE_FOLDER, session->ggSettings->gameID, session->sessionID);
+
+	return path;
+}
+
+TCHAR *GetGGFileStorePath(GlobalGameSettings *ggs, TCHAR *path)
+{
+	swprintf(path, MAX_PATH, L"%s\\%s\\", FILE_STORE_FOLDER, ggs->gameID);
+
+	return path;
 }
 
 BOOL ImportSaveFile(SessionInfo *session)
@@ -5621,6 +5645,7 @@ void DeleteSession(int sIndex)
 	ListView_DeleteItem(hMainListView, sIndex);
 	LL_RemoveIndex(&llSessions, sIndex);
 	
+	DeleteSessionFileStore(session);
 	DeleteSaveFile(session->sessionID);
 	
 	numSessions--;
@@ -6117,7 +6142,11 @@ BOOL LoadGlobalGameSettings()
 			game->fullScreen = cfgGetBool(group, L"fullscreen");
 			game->displayGameTip = cfgGetBool(group, L"display_game_tip");
 
-			game->LoadSettings(group);
+			if(!ConfigError)
+			{
+				game->LoadSettings(group);
+				ConfigError = FALSE;
+			}
 
 			if(ConfigError == TRUE)
 			{

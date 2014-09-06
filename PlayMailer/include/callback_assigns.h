@@ -23,9 +23,13 @@ callbacks->cfgGetInt64 = cfgGetInt64;
 callbacks->DLUToPixelsX = DLUToPixelsX;
 callbacks->DLUToPixelsY = DLUToPixelsY;
 callbacks->PressStringKeys = PressStringKeys;
-callbacks->WaitForSaveFile = WaitForSaveFile;
+/*callbacks->WaitForSaveFile = WaitForSaveFile;
 callbacks->WaitForSaveFileThread = WaitForSaveFileThread;
+callbacks->StartSaveFileThread = StartSaveFileThread;*/
 callbacks->StartSaveFileThread = StartSaveFileThread;
+callbacks->StartWriteFileThread = StartWriteFileThread;
+callbacks->WaitForWriteFileThread = WaitForWriteFileThread;
+callbacks->WaitForWriteFile = WaitForWriteFile;
 callbacks->ExportSaveFile = ExportSaveFile;
 callbacks->ImportSaveFile = ImportSaveFile;
 callbacks->PressKey = PressKey;
@@ -76,5 +80,11 @@ callbacks->CreateSchTask = CreateSchTask;
 callbacks->PressKeyDown = PressKeyDown;
 callbacks->PressKeyUp = PressKeyUp;
 callbacks->SpinUpCDDrive = SpinUpCDDrive;
+callbacks->ReplaceSubStrings = ReplaceSubStrings;
+callbacks->GetFileCRC = GetFileCRC;
+callbacks->BringProgramToFront = BringProgramToFront;
+callbacks->DisableInput = DisableInput;
+callbacks->GetSessionFileStorePath = GetSessionFileStorePath;
+callbacks->GetGGFileStorePath = GetGGFileStorePath;
 }
 

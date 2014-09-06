@@ -221,6 +221,9 @@ BOOL CheckGameSaved(SessionInfo *session, TCHAR *exportSave, TCHAR *exxportSave)
 BOOL CheckInternalSaveFileExists(SessionInfo *session);
 BOOL LoadGameRequest(SessionInfo *session, BOOL yourTurn);
 BOOL RunGameRequest(SessionInfo *session, BOOL yourTurn);
+void DeleteSessionFileStore(SessionInfo *session);
+TCHAR *GetSessionFileStorePath(SessionInfo *session, TCHAR *path);
+TCHAR *GetGGFileStorePath(GlobalGameSettings *ggs, TCHAR *path);
 
 // Player and Team functions
 INT_PTR CALLBACK	EditPlayersDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);

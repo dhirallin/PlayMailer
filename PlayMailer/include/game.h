@@ -157,10 +157,10 @@ public:
 	virtual TCHAR *GetSaveFolderPath();
 	virtual TCHAR **GetFactionNames() = 0;
 	virtual void PostSendEvent() {}
-	virtual void PreSaveGameEvent();
-	virtual void PreNewGameEvent();
+	virtual BOOL PreSaveGameEvent();
+	virtual BOOL PreNewGameEvent();
 	virtual void PostNewGameEvent();
-	virtual void PreLoadGameEvent() {};
+	virtual BOOL PreLoadGameEvent() { return TRUE; };
 	virtual void PostLoadGameEvent() {};
 	virtual void ToggleFullScreen();
 	virtual Team *AllocTeam() { return NULL; }

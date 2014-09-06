@@ -17,13 +17,16 @@ extern "C" PLUGINS_API void ReleasePlugin(GlobalGameSettings *ggs);
 
 class GGWarlordsSettings : public GlobalGameSettings
 {
-public:
-	BOOL lastObserveState;
-	BOOL lastSoundState;
+private:
 	static SearchReplace ConfigReplaceStrings[];
 	static int NUM_CONFIG_REPLACE_STRINGS;
 	static TCHAR *GAME_EXE_NAME_LIST[];
 	static int NUM_GAME_EXE_NAMES;
+
+public:
+	BOOL lastObserveState;
+	BOOL lastSoundState;
+	DWORD lastScenarioCRC;
 
 	SessionInfo *AllocSession();
 	SearchReplace *GetConfigReplaceStrings();
@@ -43,6 +46,8 @@ public:
 		this->KillBeforeRunGame = TRUE;
 		this->KillBeforeLoadGame = FALSE;
 		this->RandomFactionOrder = FALSE;
+
+		this->lastScenarioCRC = 0;
 	}
 
 	static INT_PTR CALLBACK GGDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
@@ -80,6 +85,16 @@ public:
 	static const int SCENARIO_WLED;
 	static const int SCENARIO_WLEDIT;
 
+	// Warlords versions
+	static const int VERSION_210;
+	static const int VERSION_PRE210;
+
+	// WLED Files
+	static TCHAR *WLEDFilesV210[];
+	static const int NumWLEDFilesV210;
+	static TCHAR *WLEDFilesPreV210[];
+	static const int NumWLEDFilesPreV210;
+
 	struct GWarlordsSettings : GameSettings
 	{
 		int saveSlot;
@@ -89,6 +104,7 @@ public:
 		BOOL enhanced;
 		BOOL intenseCombat;
 		int scenarioType;
+		int scenarioCRC;
 		TCHAR scenarioPath[MAX_PATH];
 	} gameSettings;
 
@@ -111,9 +127,20 @@ public:
 	void SetGameSettingsMask();
 	BOOL CheckGameSettingsChanged(SessionInfo *newSession);
 	TCHAR *GetSaveFileName(TCHAR *name);
+	BOOL PreNewGameEvent();
+	void PostNewGameEvent();
+	BOOL PreLoadGameEvent();
+	void PostLoadGameEvent();
+	BOOL CheckForExternalScenario();
+	BOOL RunWLED();
+	int GetWarlordsVersion(TCHAR *folderPath);
+	BOOL CompareWLEDCRCs(TCHAR *folderPath1, TCHAR *folderPath2);
+	void DeleteWLEDFiles(TCHAR *filePath);
+	int CopyWLEDFiles(TCHAR *srcFolderPath, TCHAR *destFolderPath, BOOL bFailIfExists, BOOL bCheckCRC);
+	DWORD CalculateWLEditCRC(TCHAR *folderPath);
 	static INT_PTR CALLBACK GameSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 	static void UpdateGameSettingsDialog(HWND hGameDlg);
-
+	
 	TCHAR **GetFactionNames()
 	{
 		return FactionNames;

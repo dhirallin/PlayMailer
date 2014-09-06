@@ -4,6 +4,7 @@
 struct GeneralSettings;
 struct Player;
 class SessionInfo;
+class GlobalGameSettings;
 struct Team;
 
 struct PluginCallbacks
@@ -31,9 +32,13 @@ struct PluginCallbacks
 	int (*DLUToPixelsX)(HWND hDialog, int dluX);
 	int (*DLUToPixelsY)(HWND hDialog, int dluY);
 	void (*PressStringKeys)(TCHAR *name, int length);
-	BOOL (*WaitForSaveFile)(SessionInfo *session);
+	/*BOOL (*WaitForSaveFile)(SessionInfo *session);
 	BOOL (*StartSaveFileThread)(SessionInfo *session);
-	BOOL (*WaitForSaveFileThread)();
+	BOOL (*WaitForSaveFileThread)();*/
+	BOOL (*StartSaveFileThread)(SessionInfo *session);
+	BOOL (*StartWriteFileThread)(TCHAR *filePath);
+	BOOL (*WaitForWriteFileThread)();
+	BOOL (*WaitForWriteFile)(TCHAR *filePath);
 	BOOL (*ExportSaveFile)(SessionInfo *session, BOOL quiet);
 	BOOL (*ImportSaveFile)(SessionInfo *session);
 	void (*PressKey)(WORD vKey);
@@ -86,6 +91,10 @@ struct PluginCallbacks
 	void (*SpinUpCDDrive)();
 	int (*ReplaceSubStrings)(TCHAR *dest, size_t destSize, TCHAR *src, TCHAR *searchStr, TCHAR *replaceStr);
 	DWORD (*GetFileCRC)(TCHAR *filePath);
+	int (*BringProgramToFront)(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSettings *ggs, BOOL (*isProgramWindow)(GlobalGameSettings *ggs, HWND hWnd), void (*initProgramInput)(GlobalGameSettings *ggs, HWND hWnd), int runDelay);
+	void (*DisableInput)(BOOL disable);
+	TCHAR *(*GetSessionFileStorePath)(SessionInfo *session, TCHAR *path);
+	TCHAR *(*GetGGFileStorePath)(GlobalGameSettings *ggs, TCHAR *path);
 };
 
 #endif

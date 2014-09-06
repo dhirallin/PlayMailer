@@ -14,7 +14,7 @@ extern "C"
 }
 
 #define APP_TITLE				L"PlayMailer"
-#define APP_VERSION				L"1.1b17"
+#define APP_VERSION				L"1.2b1"
 #define AUTHOR_NAME				L"Dhiraj Pallin"
 #define AUTHOR_EMAIL			L"raj@playmailer.net"
 
@@ -45,6 +45,7 @@ extern "C"
 #define OUTGOING_EMAIL_FOLDER	L"outgoing"
 
 #define INTERNAL_SAVE_FOLDER	L"save files"
+#define FILE_STORE_FOLDER		L"file store"
 #define DOSBOX_CONFIGS_FOLDER	L"DOSBox configs"
 
 #define PLAYMAILER_FROM_NAME	L"PlayMailer"

@@ -227,7 +227,7 @@ BOOL GChessTitans::SaveGame()
 		SleepC(50);
 	}
 	
-	if(!WaitForSaveFileThread())
+	if(!WaitForWriteFileThread())
 		return FALSE;
 
 	SetForegroundWindow(*PTR_hMainWnd);

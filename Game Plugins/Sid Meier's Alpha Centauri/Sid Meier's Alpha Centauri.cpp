@@ -460,7 +460,7 @@ BOOL GAlphaCentauri::SaveGame()
 	PressKey(VK_RETURN);
 	SleepC(500);
 	PressKey(VK_RETURN);
-	return WaitForSaveFileThread();
+	return WaitForWriteFileThread();
 }
 
 INT_PTR CALLBACK GAlphaCentauri::GameSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam)

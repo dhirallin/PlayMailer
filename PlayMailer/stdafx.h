@@ -50,10 +50,17 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 // Used by SHBrowseForFolder() etc
 #include <shlobj.h>
 #include <objbase.h>
+// Used by StrStrI
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "ole32.lib")
 // Enable XP Visual Styles
+
+// Calculate CRC for file
+#include <ImageHlp.h>
+#pragma comment(lib, "Imagehlp.lib")
 
 // PlaySound support
 #include <mmsystem.h>

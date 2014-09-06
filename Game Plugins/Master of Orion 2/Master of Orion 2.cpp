@@ -177,6 +177,19 @@ void GGMasterOfOrion2Settings::Install()
 
 BOOL GGMasterOfOrion2Settings::BringSetSoundToFront()
 {
+	TCHAR setSoundPath[MAX_PATH], *DOSBox;
+
+	if(!(DOSBox = GetDOSBoxPath(gameID)))
+		return NULL;
+
+	swprintf(setSoundPath, MAX_PATH, L"\"%s\" \"%ssetsound.exe\"", DOSBox, this->gameFolderPath);
+
+	return BringProgramToFront(setSoundPath, NULL, this, NULL, NULL, 2 * SECONDS);
+}
+
+/*
+BOOL GGMasterOfOrion2Settings::BringSetSoundToFront()
+{
 	HWND hWnd;
 
 	if(!(hWnd = FindGameWindow()) && !(hWnd = RunSetSound()))
@@ -236,15 +249,16 @@ HWND GGMasterOfOrion2Settings::RunSetSound()
 
 	return NULL;
 }
+*/
 
-void GMasterOfOrion2::PreNewGameEvent()
+BOOL GMasterOfOrion2::PreNewGameEvent()
 {
 	TCHAR srcPath[MAX_PATH];
 
 	swprintf(srcPath, MAX_PATH, L"%sMOX.SET", ggSettings->gameFolderPath);
 	DeleteFile(srcPath);
 
-	Game::PreNewGameEvent();
+	return Game::PreNewGameEvent();
 }
 
 GMasterOfOrion2Team *GMasterOfOrion2::AllocTeam()
@@ -890,7 +904,7 @@ BOOL GMasterOfOrion2::SaveGame()
 	
 	StartSaveFileThread(this);
 	PressKey(VK_RETURN);
-	return WaitForSaveFileThread();
+	return WaitForWriteFileThread();
 
 	return TRUE;
 }

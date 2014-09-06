@@ -7,14 +7,18 @@ HWND hGameSettingsDialog, hGGChildDialog;
 BOOL NewGameInstance;
 double MouseModifier = 1;
 
-HANDLE hSaveFileThread = NULL;
-FILETIME SaveFileWriteTime;
+HANDLE hWriteFileThread = NULL;
+TCHAR WriteFilePath[MAX_PATH];
+
+BOOL (*IsProgramWindowCallBack)(GlobalGameSettings *ggs, HWND hWnd);
+GlobalGameSettings *GlobalGameSettings_PTR;
 
 int MouseSpeed = 2;
 
 BOOL _NewGame(SessionInfo *session)
 {
 	GlobalGameSettings *ggSettings = session->ggSettings;
+	TCHAR *pRunCommand;
 	
 	if(!session)
 	{
@@ -41,11 +45,17 @@ BOOL _NewGame(SessionInfo *session)
 		return TRUE;
 	}
 
-	session->PreNewGameEvent();
+	if(!session->PreNewGameEvent())
+		return FALSE;
 
 	if(!BringGameToFront())
 	{
-		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run command \'%s\'.", ggSettings->runCommand);
+		if(session->sessionRunCommand[0] != L'\0')
+			pRunCommand = session->sessionRunCommand;
+		else
+			pRunCommand = session->ggSettings->runCommand;
+
+		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run command \'%s\'.", pRunCommand);
 		MessageBoxS(NULL, mbBuffer, L"Error running game", MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
@@ -179,7 +189,9 @@ BOOL _SaveGame(SessionInfo *session)
 		return FALSE;
 	}
 
-	session->PreSaveGameEvent();
+	if(!session->PreSaveGameEvent())
+		return FALSE;
+
 	DisableInput(TRUE);
 
 	if(!session->SaveGame())
@@ -210,17 +222,14 @@ void PressStringKeys(TCHAR *name, int length)
 	}
 }
 
-BOOL _IsGameWindow(HWND hWnd)
+BOOL _IsGameWindow(GlobalGameSettings *ggs, HWND hWnd)
 {
-	SessionInfo *session;
+	return ggs->IsGameWindow(hWnd);
+}
 
-	if(selectedSession != -1)
-	{
-		session = (SessionInfo *)LL_GetItem(&llSessions, selectedSession);
-		return session->ggSettings->IsGameWindow(hWnd);
-	}
-
-	return FALSE;
+void _InitInput(GlobalGameSettings *ggs, HWND hWnd)
+{
+	ggs->InitInput(hWnd);
 }
 
 HWND IsGameWindowTopMost()
@@ -245,7 +254,7 @@ BOOL SuspendResumeGame(BOOL suspend)
 		{
 			hFG = GetForegroundWindow();
 
-			if(!_IsGameWindow(hFG))
+			if(!IsGameWindowForeground())
 				return FALSE;
 
 			if(!(GetWindowLong(hFG, GWL_EXSTYLE) & WS_EX_TOPMOST))
@@ -342,6 +351,146 @@ HWND IsGameWindowForeground()
 	return NULL;
 }
 
+int BringProgramToFront(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSettings *ggs, BOOL (*isProgramWindow)(GlobalGameSettings *ggs, HWND hWnd), void (*initProgramInput)(GlobalGameSettings *ggs, HWND hWnd), int runDelay)
+{
+	HWND hWnd, hFG;
+	int ret = 1;
+
+	if(isProgramWindow == NULL) 
+		isProgramWindow = _IsGameWindow;
+	if(initProgramInput == NULL)
+		initProgramInput = _InitInput;
+
+	ProcSpeed = GetProcSpeed();
+
+	if(!(hWnd = FindProgramWindow(ggs, isProgramWindow)))
+	{
+		if(!(hWnd = RunProgram(runCommand, startInFolder, ggs, isProgramWindow, runDelay)))
+			return 0;
+		else
+			ret = 2;
+	}
+
+	if(IsIconic(hWnd))
+		ShowWindow(hWnd, SW_SHOWNORMAL);
+	SetForegroundWindow(hWnd);
+	
+	for(int i = 0; i < 100; i++)
+	{
+		if((hFG = GetForegroundWindow()) != NULL)
+		{
+			if(isProgramWindow(ggs, hFG)) 
+			{
+				SleepC(500); // Wait some more for good measure
+				initProgramInput(ggs, hWnd);
+	
+				return ret;	
+			}
+
+			SetForegroundWindow(hWnd);
+		}
+
+		SleepC(50);
+	}	
+
+	return 0;
+}
+
+HWND RunProgram(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSettings *ggs, BOOL (*isProgramWindow)(GlobalGameSettings *ggs, HWND hWnd), int runDelay)
+{
+	HWND hWnd;
+		
+	if(runCommand[0] == L'\0')
+		return NULL;
+
+	if(!ExecuteCmdEx(runCommand, startInFolder, FALSE))
+		return NULL;
+
+	SleepC(runDelay);
+
+	for(int i = 0; i < 100; i++)
+	{
+		if(hWnd = FindProgramWindow(ggs, isProgramWindow)) 
+			return hWnd;
+
+		SleepC(100);
+	}
+
+	return NULL;
+}
+
+HWND FindProgramWindow(GlobalGameSettings *ggs, BOOL (*isProgramWindow)(GlobalGameSettings *ggs, HWND hWnd))
+{
+	HWND hWnd;
+	
+	if(hWnd = IsProgramWindowForeground(ggs, isProgramWindow)) 
+		return hWnd;
+
+	IsProgramWindowCallBack = isProgramWindow;
+	GlobalGameSettings_PTR = ggs;
+
+	if(!EnumWindows(EnumIsProgramWindow, (LPARAM)&hWnd))
+		return hWnd;
+
+	return NULL;
+}
+
+BOOL CALLBACK EnumIsProgramWindow(HWND hWnd, LPARAM lParam)
+{
+	if(IsProgramWindowCallBack(GlobalGameSettings_PTR, hWnd))
+	{
+		*(HWND *)lParam = hWnd;
+		return FALSE;
+	}
+	else
+		*(HWND *)lParam = NULL;
+
+	return TRUE;
+}
+
+HWND IsProgramWindowForeground(GlobalGameSettings *ggs, BOOL (*isProgramWindow)(GlobalGameSettings *ggs, HWND hWnd))
+{
+	HWND hFG;
+
+	hFG = GetForegroundWindow();
+	if(!hFG) 
+		return NULL;
+	
+	if(isProgramWindow(ggs, hFG))
+		return hFG;
+
+	return NULL;	
+}
+
+BOOL BringGameToFront()
+{
+	int ret;
+	SessionInfo *session;
+	TCHAR *pRunCommand, *startInFolder;
+
+	if(selectedSession == -1)
+		return FALSE;
+	session = (SessionInfo *)LL_GetItem(&llSessions, selectedSession);
+
+	NewGameInstance = FALSE;
+
+	if(session->ggSettings->gameFolderPath[0])
+		startInFolder = session->ggSettings->gameFolderPath;
+	
+	if(session->sessionRunCommand[0] != L'\0')
+		pRunCommand = session->sessionRunCommand;
+	else
+		pRunCommand = session->ggSettings->runCommand;
+
+	ret = BringProgramToFront(pRunCommand, startInFolder, session->ggSettings, _IsGameWindow, _InitInput, session->ggSettings->RUN_DELAY);
+
+	if(ret == PROGRAM_EXECUTED)
+		NewGameInstance = TRUE;
+
+	return !!ret;
+}
+
+/*
 BOOL BringGameToFront()
 {
 	HWND hWnd, hFG;
@@ -381,7 +530,7 @@ BOOL BringGameToFront()
 	}	
 
 	return FALSE;
-}
+}*/
 
 void RestoreColorDepth()
 {
@@ -730,6 +879,8 @@ void SetMouseSpeed(int speed)
 
 BOOL _LoadGame(SessionInfo *session, BOOL exportSave)
 {
+	TCHAR *pRunCommand;
+
 	if(!session)
 	{
 		MessageBoxS(NULL, L"I don't know which game to load! First select a session in PlayMailer.", L"Unable to Load Game", MB_OK | MB_ICONEXCLAMATION);
@@ -740,10 +891,18 @@ BOOL _LoadGame(SessionInfo *session, BOOL exportSave)
 		session->ggSettings->KillGame();
 	if(exportSave)
 		ExportSaveFile(session, TRUE);
-					
+	
+	if(!session->PreLoadGameEvent())
+		return FALSE;
+
 	if(!BringGameToFront())
 	{
-		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run command \'%s\'.\nYou can run the game manually and then press Ctrl-Shift-L to load the save file.", session->ggSettings->runCommand);
+		if(session->sessionRunCommand[0] != L'\0')
+			pRunCommand = session->sessionRunCommand;
+		else
+			pRunCommand = session->ggSettings->runCommand;
+
+		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run command \'%s\'.\nYou can run the game manually and then press Ctrl-Shift-L to load the save file.", pRunCommand);
 		MessageBoxS(NULL, mbBuffer, L"Error running game", MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
@@ -761,6 +920,7 @@ BOOL _LoadGame(SessionInfo *session, BOOL exportSave)
 	if(session->ggSettings->restoreColorDepth)
 		RestoreColorDepth();
 	
+	session->PostLoadGameEvent();
 	DisplayGameTip(session);
 
 	if(isYourTurn(session))
@@ -792,6 +952,7 @@ HWND RunGame(SessionInfo *session)
 {
 	HWND hWnd;
 	TCHAR *startInFolder = NULL;
+	TCHAR *pRunCommand = session->ggSettings->runCommand;
 
 	if(session->ggSettings->runCommand[0] == L'\0')
 		return NULL;
@@ -799,7 +960,10 @@ HWND RunGame(SessionInfo *session)
 	if(session->ggSettings->gameFolderPath[0])
 		startInFolder = session->ggSettings->gameFolderPath;
 	
-	if(!ExecuteCmdEx(session->ggSettings->runCommand, startInFolder, FALSE))
+	if(session->sessionRunCommand[0] != L'\0')
+		pRunCommand = session->sessionRunCommand;
+
+	if(!ExecuteCmdEx(pRunCommand, startInFolder, FALSE))
 		return NULL;
 
 	SleepC(session->ggSettings->RUN_DELAY);
@@ -921,17 +1085,117 @@ TCHAR *FindDOSBox()
 	return NULL;
 }
 
-BOOL StartSaveFileThread(SessionInfo *session)
+BOOL StartWriteFileThread(TCHAR *filePath)
 {
-	if(!(hSaveFileThread = CreateThread(NULL, 0, SaveFileProc, session, 0, NULL)))
+	wcscpy_s(WriteFilePath, MAX_PATH, filePath);
+
+	if(!(hWriteFileThread = CreateThread(NULL, 0, WriteFileProc, WriteFilePath, 0, NULL)))
 	{
-			MessageBoxS(NULL, L"Thread error: could not create new thread", L"Thread Error", MB_OK | MB_ICONERROR);	
-			return FALSE;
+		MessageBoxS(NULL, L"Thread error: could not create new thread", L"Thread Error", MB_OK | MB_ICONERROR);	
+		return FALSE;
 	}
 
 	return TRUE;
  }
 
+ BOOL WaitForWriteFileThread()
+ {
+	 DWORD exitCode;
+
+	 WaitForSingleObject( hWriteFileThread, INFINITE );
+	 GetExitCodeThread( hWriteFileThread, &exitCode );
+	 CloseHandle( hWriteFileThread );
+
+	 return exitCode;
+ }
+
+DWORD WINAPI WriteFileProc(LPVOID lpParam)
+{
+	return WaitForWriteFile((TCHAR *)lpParam);
+}	
+
+BOOL StartSaveFileThread(SessionInfo *session)
+{
+	TCHAR saveFilePath[MAX_PATH];
+
+	session->GetSaveFilePath(saveFilePath);
+	return StartWriteFileThread(saveFilePath);
+}
+
+BOOL WaitForWriteFile(TCHAR *filePath)
+{
+	HANDLE hDir, hEvents[2], hFile;
+	BYTE buffer[8192];
+	DWORD offset = 0, bytesReturned, ret;
+	PFILE_NOTIFY_INFORMATION pNotify;
+	TCHAR *fileName, folderPath[MAX_PATH], currFileName[MAX_PATH];
+	OVERLAPPED overlapped;
+	LARGE_INTEGER liDueTime;
+	
+	wcscpy_s(folderPath, MAX_PATH, filePath);
+	PathRemoveFileSpec(folderPath);
+	fileName = PathFindFileName(filePath);
+
+	if(INVALID_HANDLE_VALUE == (hDir = CreateFile( folderPath,          
+			FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE,
+			NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, NULL)))
+		return FALSE;
+	
+	hEvents[0] = CreateEvent(NULL, FALSE, FALSE, NULL);
+	overlapped.hEvent = hEvents[0];
+
+	hEvents[1] = CreateWaitableTimer(NULL, TRUE, NULL);
+	liDueTime.QuadPart = -100000000LL;
+	SetWaitableTimer(hEvents[1], &liDueTime, 0, NULL, NULL, FALSE);
+
+	while(1)
+	{
+		if(!ReadDirectoryChangesW(hDir, buffer, sizeof(buffer), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE,
+				&bytesReturned, &overlapped, NULL))
+		{
+			SleepC(50);
+			continue;
+		}
+
+		ret = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		switch(ret) 
+		{
+			case WAIT_OBJECT_0:
+				do
+				{
+					pNotify = (PFILE_NOTIFY_INFORMATION)&buffer[offset];
+					offset += pNotify->NextEntryOffset;
+ 
+					lstrcpynW(currFileName, pNotify->FileName, min(MAX_PATH, pNotify->FileNameLength / sizeof(WCHAR) + 1));
+			
+					if(!_wcsicmp(fileName, currFileName))
+					{
+						SleepC(500); // Make sure all writes are finished.
+						hFile = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0,NULL);
+						if (hFile != INVALID_HANDLE_VALUE) 
+						{
+							CloseHandle(hFile);
+							CloseHandle(hEvents[0]);
+							CloseHandle(hEvents[1]);
+							CloseHandle(hDir);
+							return TRUE;
+						}
+					}
+				} while (pNotify->NextEntryOffset != 0);
+				break;
+			case WAIT_OBJECT_0 + 1:
+			default:
+				CloseHandle(hEvents[0]);
+				CloseHandle(hEvents[1]);
+				CloseHandle(hDir);
+				return FALSE;
+		}
+	}
+
+	return FALSE;
+}
+
+/*
  BOOL WaitForSaveFileThread()
  {
 	 DWORD exitCode;
@@ -946,7 +1210,7 @@ BOOL StartSaveFileThread(SessionInfo *session)
 DWORD WINAPI SaveFileProc(LPVOID lpParam)
 {
 	return WaitForSaveFile((SessionInfo *)lpParam);
-}	
+}
 
 BOOL WaitForSaveFile(SessionInfo *session)
 {
@@ -1019,6 +1283,7 @@ BOOL WaitForSaveFile(SessionInfo *session)
 
 	return FALSE;
 }
+*/
 
 int DLUToPixelsX(HWND hDialog, int dluX)
 {

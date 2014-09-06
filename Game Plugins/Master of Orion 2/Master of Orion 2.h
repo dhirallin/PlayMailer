@@ -143,7 +143,7 @@ public:
 	void ParseEmailTeamSettings(config_setting_t *group, Team *team);
 	void UpdateEmailTeamSettings(Team *out, Team *in);
 	TCHAR *GetSaveFileName(TCHAR *name);
-	void PreNewGameEvent();
+	BOOL PreNewGameEvent();
 	struct GMasterOfOrion2Team *AllocTeam();
 	BOOL ValidateTeamSettings(Team *team, int type, int sIndex, int tIndex);
 

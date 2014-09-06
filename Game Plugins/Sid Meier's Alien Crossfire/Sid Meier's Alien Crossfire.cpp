@@ -506,7 +506,7 @@ BOOL GAlienCrossfire::SaveGame()
 	PressKey(VK_RETURN);
 	SleepC(500);
 	PressKey(VK_RETURN);
-	return WaitForSaveFileThread();
+	return WaitForWriteFileThread();
 }
 
 INT_PTR CALLBACK GAlienCrossfire::GameSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam)
