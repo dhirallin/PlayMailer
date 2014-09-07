@@ -374,7 +374,7 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 	cfgError[0] = L'\0';
 	
 	if(type == VALIDATE_FILE) 
-		swprintf(cfgError, sizeof(cfgError), L"Error in %s in session #%d. ", SESSIONS_CONFIG_FILE, sIndex);
+		swprintf(cfgError, sizeof(cfgError), L"Error in session \"%s\". ", this->sessionName);
 	else if(type == VALIDATE_GUI)
 		hWnd = *PTR_hSessionSettingsDialog;
 
@@ -384,7 +384,7 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"computer_difficulty\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"computer_difficulty\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -394,7 +394,7 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_type\" is invalid type.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"scenario_type\" is invalid type.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -405,7 +405,7 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 		// Check save slot is valid
 		if(game->saveSlot < 1 || game->saveSlot > 8)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"save_slot\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"save_slot\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 			return FALSE;
 		}
@@ -413,17 +413,17 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 		if(game->scenarioType == SCENARIO_WLED && 
 				(_waccess(game->scenarioPath, 0) || wcscmp(game->scenarioPath + wcslen(game->scenarioPath) - 3, L".WL")))
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_path\" is invalid. WLED Recovery File not found.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"scenario_path\" is invalid. WLED Recovery File not found.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
-			return FALSE;
+			return (type == VALIDATE_FILE);
 		}
 		else if(game->scenarioType == SCENARIO_WLEDIT)
 		{
 			if(_waccess(game->scenarioPath, 0))
 			{
-				swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_path\" is an invalid folder path.", cfgError);
+				swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"scenario_path\" is an invalid folder path.", cfgError);
 				MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
-				return FALSE;
+				return (type == VALIDATE_FILE);
 			}
 
 			HANDLE hFile;
@@ -435,9 +435,9 @@ BOOL GWarlords::ValidateGameSettings(BOOL type, int sIndex)
 			wcscat_s(game->scenarioPath, MAX_PATH, L"*.WL0");
 			if((hFile = FindFirstFile(game->scenarioPath, &fileData)) == INVALID_HANDLE_VALUE)
 			{
-				swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"scenario_path\" is invalid. The folder specified does not contain any WLEDIT .WL0 files.", cfgError);
+				swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"scenario_path\" is invalid. The folder specified does not contain any WLEDIT .WL0 files.", cfgError);
 				MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
-				return FALSE;
+				return (type == VALIDATE_FILE);
 			}
 			wcsrchr(game->scenarioPath, L'*')[0] = L'\0';
 			FindClose(hFile);	

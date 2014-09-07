@@ -591,14 +591,14 @@ BOOL GMasterOfOrion2::ValidateTeamSettings(Team *team, int type, int sIndex, int
 	cfgError[0] = L'\0';
 
 	if(type == VALIDATE_FILE) 
-		swprintf(cfgError, sizeof(cfgError), L"Error in %s in session #%d, team #%d", SESSIONS_CONFIG_FILE, sIndex, tIndex);
+		swprintf(cfgError, sizeof(cfgError), L"Error in session \"%s\", team #%d", this->sessionName, tIndex);
 
 	trimWhiteSpace(pTeam->ruler);
 	if(pTeam->ruler[0] == L'\0')
 	{
 		if(type == VALIDATE_FILE)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"ruler_name\" cannot be left blank.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"ruler_name\" cannot be left blank.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -608,7 +608,7 @@ BOOL GMasterOfOrion2::ValidateTeamSettings(Team *team, int type, int sIndex, int
 	{
 		if(type == VALIDATE_FILE)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"banner_color\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"banner_color\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -992,7 +992,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 	cfgError[0] = L'\0';
 
 	if(type == VALIDATE_FILE) 
-		swprintf(cfgError, sizeof(cfgError), L"Error in %s in session #%d. ", SESSIONS_CONFIG_FILE, sIndex);
+		swprintf(cfgError, sizeof(cfgError), L"Error in session \"%s\". ", this->sessionName);
 	else if(type == VALIDATE_GUI)
 		hWnd = *PTR_hSessionSettingsDialog;
 
@@ -1001,7 +1001,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 		// Check save slot is valid
 		if(game->saveSlot < 1 || game->saveSlot > 9)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"save_slot\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"save_slot\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 			return FALSE;
 		}
@@ -1011,7 +1011,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"computer_difficulty\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"computer_difficulty\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -1021,7 +1021,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"total_players\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"total_players\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -1031,7 +1031,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"galaxy_size\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"galaxy_size\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -1041,7 +1041,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"galaxy_age\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"galaxy_age\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -1051,7 +1051,7 @@ BOOL GMasterOfOrion2::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"tech_level\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"tech_level\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;

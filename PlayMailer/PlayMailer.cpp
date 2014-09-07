@@ -8103,7 +8103,7 @@ int MessageBoxS(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType)
 		
 	HotKeysEnabled = FALSE;
 	SuspendResumeGame(TRUE);
-	SetWindowsHookEx(WH_CBT, DisableMainWndProc, NULL, GetCurrentThreadId());
+	hMsgBoxHook = SetWindowsHookEx(WH_CBT, DisableMainWndProc, NULL, GetCurrentThreadId());
 	ret = MessageBox(hWnd, lpText, lpCaption, uType | MB_SETFOREGROUND | MB_TOPMOST);
 	UnhookWindowsHookEx(hMsgBoxHook);
 	SuspendResumeGame(FALSE);

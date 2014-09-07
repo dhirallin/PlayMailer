@@ -326,7 +326,7 @@ BOOL GChessTitans::ValidateGameSettings(BOOL type, int sIndex)
 	cfgError[0] = L'\0';
 	
 	if(type == VALIDATE_FILE) 
-		swprintf(cfgError, sizeof(cfgError), L"Error in %s in session #%d. ", SESSIONS_CONFIG_FILE, sIndex);
+		swprintf(cfgError, sizeof(cfgError), L"Error in session \"%s\". ", this->sessionName);
 	else if(type == VALIDATE_GUI)
 		hWnd = *PTR_hSessionSettingsDialog;
 
@@ -334,7 +334,7 @@ BOOL GChessTitans::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"computer_difficulty\" is out of range.", cfgError);
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"computer_difficulty\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;

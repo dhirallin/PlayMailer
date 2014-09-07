@@ -175,7 +175,7 @@ BOOL GAlphaCentauri::ValidateTeamSettings(Team *team, int type, int sIndex, int 
 	cfgError[0] = L'\0';
 
 	if(type == VALIDATE_FILE) 
-		swprintf(cfgError, sizeof(cfgError), L"Error in %s in session #%d, team #%d", SESSIONS_CONFIG_FILE, sIndex, tIndex);
+		swprintf(cfgError, sizeof(cfgError), L"Error in session \"%s\", team #%d. ", this->sessionName, tIndex);
 
 	trimWhiteSpace(pTeam->name);
 	trimWhiteSpace(pTeam->formal);
@@ -699,7 +699,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	cfgError[0] = L'\0';
 
 	if(type == VALIDATE_FILE) 
-		swprintf(cfgError, sizeof(cfgError), L"Error in %s in session #%d. ", SESSIONS_CONFIG_FILE, sIndex);
+		swprintf(cfgError, sizeof(cfgError), L"Error in session \"%s\". ", this->sessionName);
 	else if(type == VALIDATE_GUI)
 		hWnd = *PTR_hSessionSettingsDialog;
 
@@ -716,7 +716,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"map_type\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"map_type\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -726,7 +726,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"difficulty\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"difficulty\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -736,7 +736,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"planet_size\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"planet_size\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -746,7 +746,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"game_rules\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"game_rules\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -756,7 +756,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"ocean_coverage\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"ocean_coverage\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -766,7 +766,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"erosive_forces\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"erosive_forces\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -776,7 +776,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"native_life_forms\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"native_life_forms\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -786,7 +786,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"cloud_cover\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"cloud_cover\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -796,7 +796,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"horizontal_map_size\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"horizontal_map_size\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
@@ -806,7 +806,7 @@ BOOL GAlphaCentauri::ValidateGameSettings(BOOL type, int sIndex)
 	{
 		if(type != VALIDATE_EMAIL)
 		{
-			swprintf(mbBuffer, MBBUFFER_SIZE, L"Setting \"vertical_map_size\" is out of range.");
+			swprintf(mbBuffer, MBBUFFER_SIZE, L"%sSetting \"vertical_map_size\" is out of range.", cfgError);
 			MessageBox(hWnd, mbBuffer, L"Invalid setting", MB_OK | MB_ICONERROR);
 		}
 		return FALSE;
