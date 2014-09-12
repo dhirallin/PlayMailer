@@ -61,6 +61,7 @@ void GGWarlordsSettings::LoadSettings(config_setting_t *group)
 	lastObserveState = cfgGetBool(group, L"last_observe_state");
 	lastSoundState = cfgGetBool(group, L"last_sound_state");
 	lastScenarioCRC = cfgGetInt(group, L"last_scenario_crc");
+	WLEDConfigCRC = cfgGetInt(group, L"wled_config_crc");
 }
 
 void GGWarlordsSettings::SaveSettings(config_setting_t *group)
@@ -68,6 +69,7 @@ void GGWarlordsSettings::SaveSettings(config_setting_t *group)
 	cfgSetBool(group, L"last_observe_state", lastObserveState);
 	cfgSetBool(group, L"last_sound_state", lastSoundState);
 	cfgSetInt(group, L"last_scenario_crc", lastScenarioCRC);
+	cfgSetInt(group, L"wled_config_crc", WLEDConfigCRC);
 }
 
 SearchReplace *GGWarlordsSettings::GetConfigReplaceStrings()
@@ -944,9 +946,10 @@ int GWarlords::CopyWLEDFiles(TCHAR *srcFolderPath, TCHAR *destFolderPath, BOOL b
 
 BOOL GWarlords::RunWLED()
 {
-	TCHAR runPath[MAX_PATH], exePath[MAX_PATH], scenarioPath[MAX_PATH], *DOSBox;
-	DWORD runDelay;
+	TCHAR runPath[MAX_PATH], configPath[MAX_PATH], exePath[MAX_PATH], scenarioPath[MAX_PATH], *DOSBox;
+	DWORD runDelay, configCRC;
 	BOOL ret = TRUE;
+	GGWarlordsSettings *ggSettings = (GGWarlordsSettings *)this->ggSettings;
 
 	// Clear read-only permission on WARLORDS.EXE
 	swprintf(exePath, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
@@ -967,19 +970,23 @@ BOOL GWarlords::RunWLED()
 		return FALSE;
 	}
 
-	swprintf(runPath, MAX_PATH, L"%sWLED.INI", ggSettings->gameFolderPath);
-	if(_waccess(runPath, 0))
-		runDelay = 15 * SECONDS;
+	swprintf(configPath, MAX_PATH, L"%sWLED.INI", ggSettings->gameFolderPath);
+	configCRC = GetFileCRC(configPath);
+	if(configCRC == 0 || configCRC != ggSettings->WLEDConfigCRC)
+		runDelay = 17 * SECONDS;
 	else
-		runDelay = 6 * SECONDS;
+		runDelay = 8 * SECONDS;
+
+	DisableInput(TRUE);
 
 	swprintf(runPath, MAX_PATH, L"\"%s\" -c \"mount C: \'%s\'\" -c \"C:\" -c \"WLED.EXE PLAYMAIL.WL\"", DOSBox, ggSettings->gameFolderPath);
 	//swprintf(runPath, MAX_PATH, L"\"%s\" \"%sWLED.EXE\"", DOSBox, ggSettings->gameFolderPath);
 	if(!BringProgramToFront(runPath, NULL, ggSettings, NULL, NULL, runDelay))
+	{
+		DisableInput(FALSE);
 		return FALSE;
-
-	DisableInput(TRUE);
-
+	}
+	
 	PressHotKey(VK_LSHIFT, VK_F3);
 	SleepC(500);
 	StartWriteFileThread(exePath);
@@ -992,6 +999,8 @@ BOOL GWarlords::RunWLED()
 	ggSettings->KillGame();
 	DisableInput(FALSE);
 	DeleteFile(scenarioPath);
+	ggSettings->WLEDConfigCRC = GetFileCRC(configPath);
+	SaveGlobalGameSettings();
 	
 	if(!ret)
 		MessageBoxS(NULL, L"Error patching game files in WLED. Make sure you are using a supported version of Warlords such as v2.10.", L"Error patching game files.", MB_OK | MB_ICONERROR);

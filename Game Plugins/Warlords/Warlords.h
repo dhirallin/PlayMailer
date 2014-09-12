@@ -27,6 +27,7 @@ public:
 	BOOL lastObserveState;
 	BOOL lastSoundState;
 	DWORD lastScenarioCRC;
+	DWORD WLEDConfigCRC;
 
 	SessionInfo *AllocSession();
 	SearchReplace *GetConfigReplaceStrings();
@@ -48,6 +49,7 @@ public:
 		this->RandomFactionOrder = FALSE;
 
 		this->lastScenarioCRC = 0;
+		this->WLEDConfigCRC = 0;
 	}
 
 	static INT_PTR CALLBACK GGDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);

@@ -48,6 +48,8 @@ BOOL _NewGame(SessionInfo *session)
 	if(!session->PreNewGameEvent())
 		return FALSE;
 
+	DisableInput(TRUE);
+
 	if(!BringGameToFront())
 	{
 		if(session->sessionRunCommand[0] != L'\0')
@@ -55,12 +57,14 @@ BOOL _NewGame(SessionInfo *session)
 		else
 			pRunCommand = session->ggSettings->runCommand;
 
+		DisableInput(FALSE);
+
 		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run command \'%s\'.", pRunCommand);
 		MessageBoxS(NULL, mbBuffer, L"Error running game", MB_OK | MB_ICONERROR);
+		
 		return FALSE;
 	}
 
-	DisableInput(TRUE);
 	if(!session->NewGame())
 	{
 		DisableInput(FALSE);

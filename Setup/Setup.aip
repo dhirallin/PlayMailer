@@ -6,10 +6,10 @@
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="CTRLS" Value="2"/>
     <ROW Property="Manufacturer" Value="MuddleSoft" ValueLocId="*"/>
-    <ROW Property="ProductCode" Value="1033:{6ACAB08A-25BF-4BC6-BBF0-EF1637B5E39B} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{D5AC2DEA-716D-441C-98E5-B7DF42AB2BAF} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="PlayMailer" ValueLocId="*"/>
-    <ROW Property="ProductVersion" Value="1.2.1" Type="32"/>
+    <ROW Property="ProductVersion" Value="1.2.4" Type="32"/>
     <ROW Property="RUNAPPLICATION" Value="1" Type="4"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{3E93012B-5B64-4E65-AA85-A8FA7DB08446}"/>

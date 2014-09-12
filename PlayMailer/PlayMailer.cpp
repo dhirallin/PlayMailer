@@ -613,7 +613,7 @@ uint8_t GetCPULoad()
 	uint8_t cpu;
 
 	GetSystemTimes( &idleTime1, &kernelTime1, &userTime1 );
-	Sleep(100);
+	Sleep(500);
 	GetSystemTimes( &idleTime2, &kernelTime2, &userTime2 );
 
 	usr.HighPart = userTime2.dwHighDateTime - userTime1.dwHighDateTime;
@@ -653,6 +653,8 @@ uint64_t GetLoopSpeed()
 
 DWORD GetProcSpeed()
 {
+	int cpuLoad;
+	
 	/*
 	DWORD speed1 = (DWORD)BaseProcSpeed * (100 - GetCPULoad()) / 100;
 	DWORD speed2 = (DWORD)(GetLoopSpeed() / (BENCH_CPULOAD / BENCH_CLOCK));
@@ -660,7 +662,9 @@ DWORD GetProcSpeed()
 	return MIN(speed1, speed2);
 	*/
 
-	return (DWORD)BaseProcSpeed * (100 - GetCPULoad()) / 100;
+	cpuLoad = GetCPULoad();
+
+	return (DWORD)BaseProcSpeed * (100 - MAX(cpuLoad, 50)) / 100;
 }
 
 DWORD GetBaseProcSpeed()
