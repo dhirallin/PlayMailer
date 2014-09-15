@@ -14,7 +14,7 @@ extern "C"
 }
 
 #define APP_TITLE				L"PlayMailer"
-#define APP_VERSION				L"1.2b4"
+#define APP_VERSION				L"1.2b5"
 #define AUTHOR_NAME				L"Dhiraj Pallin"
 #define AUTHOR_EMAIL			L"raj@playmailer.net"
 

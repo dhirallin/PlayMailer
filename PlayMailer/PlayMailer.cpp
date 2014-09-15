@@ -9097,7 +9097,9 @@ BOOL RemoveProgramFromStartup()
 	if(MajorVersion < 6)
 		return RemoveProgramFromStartupRegistry();
 
-	return ExecuteCmd(L"schtasks /Delete /TN \"PlayMailer Startup\"");
+	return ExecuteCmd(L"schtasks /Delete /TN \"PlayMailer Startup\" /F");
+
+	return TRUE;
 }
 
 BOOL AddProgramToStartupRegistry(BOOL minimized)
