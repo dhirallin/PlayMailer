@@ -390,6 +390,7 @@ LRESULT CALLBACK	MainListViewProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 LRESULT CALLBACK	StatusBarProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	QuitDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+uint32_t GetIPFromName(char *name);
 uint8_t GetCPULoad();
 uint64_t GetLoopSpeed();
 int mod(int a, int b);

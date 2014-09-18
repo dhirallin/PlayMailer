@@ -14,7 +14,7 @@ extern "C"
 }
 
 #define APP_TITLE				L"PlayMailer"
-#define APP_VERSION				L"1.2b5"
+#define APP_VERSION				L"1.2b6"
 #define AUTHOR_NAME				L"Dhiraj Pallin"
 #define AUTHOR_EMAIL			L"raj@playmailer.net"
 
@@ -111,7 +111,7 @@ extern "C"
 #define SENDEMAIL_DIALOG_INTERVAL		4 * SECONDS
 #define CHECK_INTERNET_TIMER			5
 #define CHECK_INTERNET_INTERVAL			5 * SECONDS
-#define IMAP_IDLE_INTERVAL				20 * MINUTES // 29 minutes according to IMAP RFC -- set to 20 for dumb servers
+#define IMAP_IDLE_INTERVAL				5 * MINUTES // 29 minutes according to IMAP RFC -- set to 5 for dumb servers
 #define CHECK_TOPMOST_TIMER				6
 #define CHECK_TOPMOST_INTERVAL			1 * SECONDS
 

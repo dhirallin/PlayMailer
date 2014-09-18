@@ -13,6 +13,7 @@ enum SecurityProtocol {
 
 struct mailimap * imap = NULL;
 int NumExists;
+BOOL IMAPMailExists = FALSE;
 
 static int check_error(int r, char * msg)
 {
@@ -271,6 +272,9 @@ static int fetch_messages(struct mailimap * imap)
 int imap_fetch(char *server, unsigned short port, char *login, char *password, int security, char *search_str)
 {
 	int r;
+	BOOL alreadyConnected = TRUE;
+
+	IMAPMailExists = FALSE;
 
 #ifdef _DEBUG
 	mailstream_debug=1;
@@ -278,14 +282,16 @@ int imap_fetch(char *server, unsigned short port, char *login, char *password, i
 
 	_mkdir("incoming");
 		
-	if(imap && ((r = mailimap_noop(imap)) && check_error(r, "could not send command")))
+	/*if(imap && ((r = mailimap_noop(imap)) && check_error(r, "could not send command")))
 	{
 		mailimap_free(imap);
 		imap = NULL;
-	}
+	}*/
 
+connect:
 	if(!imap)
 	{
+		alreadyConnected = FALSE;
 		imap = mailimap_new(0, NULL);
 		
 		if(security == SECURITY_SSL)
@@ -323,7 +329,15 @@ int imap_fetch(char *server, unsigned short port, char *login, char *password, i
 			r = fetch_messages(imap);
 
 		if(check_error(r, "could not fetch"))
+		{
+			if(alreadyConnected)
+			{
+				mailimap_free(imap);
+				imap = NULL;
+				goto connect;
+			}
 			goto logout;
+		}
 	
 	} while(NumExists != imap->imap_selection_info->sel_exists);
 			
@@ -351,6 +365,8 @@ int imap_idle()
 {
 	int r;
 
+	IMAPMailExists = FALSE;
+
 	if(!imap || !mailimap_has_idle(imap))
 		return -1;
 
@@ -361,7 +377,7 @@ int imap_idle()
 	if (NumExists != imap->imap_selection_info->sel_exists) 
 	{
 		imap_idle_done();
-		return -2;
+		IMAPMailExists = TRUE;
     }
 
 	return mailimap_idle_get_fd(imap);

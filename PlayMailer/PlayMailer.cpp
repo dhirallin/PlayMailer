@@ -6,6 +6,7 @@
 #include "MinimizeToTray.h"
 #include <Shellapi.h>
 #include <Winsock2.h>
+#include <ws2tcpip.h>
 #include <errno.h>
 
 #define MAX_LOADSTRING 100
@@ -82,7 +83,7 @@ LinkedList llGlobalGameSettings = {0};
 int FailedFetches = 0;
 
 HANDLE hRecvEmailThread = NULL;
-SOCKET IMAPSocket = -1;
+SOCKET IMAPSocket = INVALID_SOCKET;
 HANDLE hRecvEmailEvents[NUM_RECVEMAIL_EVENTS], hDoneEvent;
 
 HANDLE hSendEmailThread = NULL;
@@ -696,12 +697,36 @@ BOOL IsInternetConnected()
 {
 	DWORD internetFlags;
 
-	InternetConnectedState = InternetGetConnectedState(&internetFlags, 0);
-
-	if(!InternetConnectedState)
+	if(!InternetGetConnectedState(&internetFlags, 0))
+	//		|| !GetIPFromName("www.google.com"))
+	{
+		InternetConnectedState = FALSE;
 		SetWindowText(hStatusBar, L"Internet not connected.");
+	}
+	else 
+		InternetConnectedState = TRUE;
 
 	return InternetConnectedState;
+}
+
+uint32_t GetIPFromName(char *name)
+{
+	struct addrinfo aiHints;
+	struct addrinfo *aiList = NULL;
+	uint32_t ip;
+ 
+	memset(&aiHints, 0, sizeof(aiHints));
+	aiHints.ai_family = AF_INET;
+	aiHints.ai_socktype = SOCK_STREAM;
+	aiHints.ai_protocol = IPPROTO_TCP;
+ 
+	if (getaddrinfo(name, NULL, &aiHints, &aiList) != 0)
+		ip = 0;
+	else
+		ip = ((struct sockaddr_in *)(aiList->ai_addr))->sin_addr.s_addr;
+		
+	freeaddrinfo(aiList);
+    return ip;
 }
 
 void CheckAllPlayerTeams()
@@ -758,7 +783,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	MINMAXINFO* pmmi;
 
 	if(MinimizeToTrayProc(hWnd, message, wParam, lParam))
+	{
+		UpdateWindow(hWnd);
 		return 0;
+	}
 
 	switch (message)
 	{
@@ -991,6 +1019,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			RestoreWndFromTray(hWnd);
 			ShowNotifyIcon(hWnd, FALSE);
+			UpdateWindow(hWnd);
 		}
 		else
 			SetForegroundWindow(hWnd);
@@ -7270,10 +7299,10 @@ LeaveCriticalSection(&Crit);
 
 	if(mail->inMailProtocol == PROTOCOL_IMAP)
 	{
-		if(IMAPSocket >= 0) 
+		if(IMAPSocket != INVALID_SOCKET) 
 			imap_idle_done();
 
-		IMAPSocket = -1;
+		IMAPSocket = INVALID_SOCKET;
 		
 		if(securityProtocol == SECURITY_SSL)
 			port = IMAP_SSL_PORT;
@@ -7306,7 +7335,7 @@ LeaveCriticalSection(&Crit);
 	}
 	else // POP3
 	{
-		IMAPSocket = -1;
+		IMAPSocket = INVALID_SOCKET;
 
 		if(securityProtocol == SECURITY_SSL)
 			port = POP3_SSL_PORT;
@@ -8849,11 +8878,22 @@ DWORD WINAPI RecvEmailThreadProc(LPVOID lpParam)
 
 		switch(result)
 		{
+		case WAIT_TIMEOUT:
 		case WAIT_OBJECT_0 + EVENT_RECVEMAIL_IMAPSOCKET:	
 		case WAIT_OBJECT_0 + EVENT_RECVEMAIL_CHECK:
-		case WAIT_TIMEOUT:	
-			if(IMAPSocket >= 0)
+			if(IMAPSocket != INVALID_SOCKET)
 				WSAEventSelect(IMAPSocket, hRecvEmailEvents[EVENT_RECVEMAIL_IMAPSOCKET], 0);
+			
+			if(result == WAIT_TIMEOUT && mail->inMailProtocol == PROTOCOL_IMAP)
+			{
+				imap_idle_done();
+				if((IMAPSocket = imap_idle()) != INVALID_SOCKET && !IMAPMailExists)
+				{
+					WSAEventSelect(IMAPSocket, hRecvEmailEvents[EVENT_RECVEMAIL_IMAPSOCKET], FD_READ | FD_CLOSE);	
+					timeout = GetIncomingTimerInterval();
+					break;
+				}
+			}
 
 			do
 			{
@@ -8861,7 +8901,7 @@ DWORD WINAPI RecvEmailThreadProc(LPVOID lpParam)
 				{
 					FailedFetches = 0;
 
-					if(mail->inMailProtocol == PROTOCOL_IMAP && IMAPSocket >= 0)
+					if(mail->inMailProtocol == PROTOCOL_IMAP && IMAPSocket != INVALID_SOCKET)
 						WSAEventSelect(IMAPSocket, hRecvEmailEvents[EVENT_RECVEMAIL_IMAPSOCKET], FD_READ | FD_CLOSE);	
 				}	
 				else
@@ -8869,17 +8909,17 @@ DWORD WINAPI RecvEmailThreadProc(LPVOID lpParam)
 					FailedFetches++;
 					break;
 				}
-			} while(IMAPSocket == -2);
+			} while(IMAPMailExists);
 
 			PostMessage(hMainWnd, WM_PARSE_MAIL, 0, 0);	
 			timeout = GetIncomingTimerInterval();
-			
+
 			break;
 		case WAIT_OBJECT_0 + EVENT_RECVEMAIL_LOGOUT:
 		case WAIT_OBJECT_0 + EVENT_RECVEMAIL_QUIT:
 			imap_idle_done();
 			imap_logout();
-			IMAPSocket = -1;
+			IMAPSocket = INVALID_SOCKET;
 			FailedFetches = 0;
 			
 			if(result == WAIT_OBJECT_0 + EVENT_RECVEMAIL_QUIT)
@@ -8894,9 +8934,9 @@ DWORD WINAPI RecvEmailThreadProc(LPVOID lpParam)
 
 int GetIncomingTimerInterval()
 {
-	if(FailedFetches >= 5)
-		return LONG_POLLING_INTERVAL;
-	else if(IMAPSocket != -1)
+	//if(FailedFetches >= 5)
+	//	return LONG_POLLING_INTERVAL;
+	if(IMAPSocket != INVALID_SOCKET)
 		return IMAP_IDLE_INTERVAL;
 	else if(mail->checkMailInterval) 
 		return mail->checkMailInterval * SECONDS;
