@@ -784,7 +784,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	if(MinimizeToTrayProc(hWnd, message, wParam, lParam))
 	{
-		UpdateWindow(hWnd);
+		RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
 		return 0;
 	}
 
@@ -1019,7 +1019,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			RestoreWndFromTray(hWnd);
 			ShowNotifyIcon(hWnd, FALSE);
-			UpdateWindow(hWnd);
+			RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
 		}
 		else
 			SetForegroundWindow(hWnd);
