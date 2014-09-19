@@ -80,7 +80,7 @@ int selectedSession = -1;
 LinkedList llEmailHistory = {0}, llNameHistory = {0};
 LinkedList llGlobalGameSettings = {0};
 
-int FailedFetches = 0;
+int FailedFetches = 0, FailedSends = 0;
 
 HANDLE hRecvEmailThread = NULL;
 SOCKET IMAPSocket = INVALID_SOCKET;
@@ -7249,7 +7249,8 @@ LeaveCriticalSection(&Crit);
 		break;
 	case 25:
 		swprintf(mbBuffer, MBBUFFER_SIZE, L"Could not connect to SMTP mail server: \"%s\". Unknown adddress or connection refused.", server);
-		MessageBoxS(NULL, mbBuffer, L"SMTP Mail Error", MB_ICONERROR | MB_OK);
+		if(FailedSends == 2)
+			MessageBoxS(NULL, mbBuffer, L"SMTP Mail Error", MB_ICONERROR | MB_OK);
 		break;
 	case 16:
 		swprintf(mbBuffer, MBBUFFER_SIZE, L"Could not connect to SMTP mail server: \"%s\". Check that this SMTP server supports your configured Outgoing Security Protocol.", server);
@@ -8946,7 +8947,9 @@ int GetIncomingTimerInterval()
 
 DWORD WINAPI SendEmailThreadProc(LPVOID lpParam)
 {
-	DWORD result, timeout = INFINITE, failedSends, quiet = FALSE;
+	DWORD result, timeout = INFINITE, quiet = FALSE;
+
+	FailedSends = 0;
 
 	while(1)
 	{
@@ -8955,28 +8958,28 @@ DWORD WINAPI SendEmailThreadProc(LPVOID lpParam)
 		switch(result)
 		{
 		case WAIT_OBJECT_0 + EVENT_SENDEMAIL_CHECK:
-			failedSends = 0;	
+			FailedSends = 0;	
 			quiet = FALSE;
 		case WAIT_TIMEOUT:		
 			if(!IsInternetConnected())
 			{
 				timeout = OUTGOING_TIMER_INTERVAL;
-				failedSends = 0;
+				FailedSends = 0;
 				break;
 			}
 
 			if(CheckOutgoingMail(quiet))
 			{
-				failedSends++;
+				FailedSends++;
 
-				if(failedSends >= MAX_FAILED_SENDS)
-					timeout = LONG_OUTGOING_TIMER_INTERVAL;
-				else 
+				//if(FailedSends >= MAX_FAILED_SENDS)
+				//	timeout = LONG_OUTGOING_TIMER_INTERVAL;
+				//else 
 					timeout = OUTGOING_TIMER_INTERVAL;
 			}
 			else
 			{
-				failedSends = 0;
+				FailedSends = 0;
 				timeout = INFINITE;
 			}
 			quiet = TRUE;
