@@ -23,7 +23,7 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #define LIB_NAME_DECORATION(NAME) NAME ## ".lib"
 #endif
 
-// C RunTime Header Files
+// C RunTime and Windows Header Files
 #include <Commdlg.h> 
 #include <stdlib.h>
 #include <malloc.h>
@@ -37,7 +37,12 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include <WindowsX.h>
 #include <htmlhelp.h>
 #include <Richedit.h>
+#include <errno.h>
 #include <math.h>
+
+// WinSock
+#include <Winsock2.h>
+#include <ws2tcpip.h>
 
 // For ShellExecute()
 #include <ShellAPI.h>

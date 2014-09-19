@@ -159,10 +159,6 @@ typedef struct LVSessionButtons_t
 
 #define MBBUFFER_SIZE	2048
 
-typedef int WINAPI Wow64DisableWow64FsRedirectionFn(PVOID *OldValue);
-typedef int WINAPI Wow64RevertWow64FsRedirectionFn(PVOID OldValue);
-void DisableWow64Redirection(BOOL disable);
-
 extern HINSTANCE hInst;
 extern DWORD ProcSpeed;
 extern GeneralSettings *settings;
@@ -210,7 +206,6 @@ int ParseEmailSessionID(TCHAR *text, size_t textSize);
 void CheckYourTurn();
 BOOL CheckNewGame(SessionInfo *session);
 int getRoundNumber(SessionInfo *session);
-int getSelectedSaveSlot();
 TCHAR *getSelectedGameName();
 BOOL isYourTurn(SessionInfo *session);
 BOOL ExportSaveFile(SessionInfo *session, BOOL quiet);
@@ -223,13 +218,13 @@ BOOL LoadGameRequest(SessionInfo *session, BOOL yourTurn);
 BOOL RunGameRequest(SessionInfo *session, BOOL yourTurn);
 void DeleteSessionFileStore(SessionInfo *session);
 TCHAR *GetSessionFileStorePath(SessionInfo *session, TCHAR *path);
-TCHAR *GetGGFileStorePath(GlobalGameSettings *ggs, TCHAR *path);
 
 // Player and Team functions
 INT_PTR CALLBACK	EditPlayersDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK	EditPlayersListViewProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK	EditPlayersEditProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	NewPlayerNameDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK	NewPlayerFactionDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	PlayerListDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK	PlayerListLVProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 int FindPlayerByID(SessionInfo *session, int id);
@@ -248,7 +243,6 @@ void ClearAllTeamFlags(SessionInfo *session);
 void SavePlayerHistory();
 void LoadPlayerHistory();
 BOOL InitPlayerListLV(HWND hWndListView);
-void SetCurrentPlayerIcon(HWND hLV, SessionInfo *session);
 void FillPlayerEmailCombo(TCHAR *selectedEmail);
 void FillPlayerNameCombo(TCHAR *selectedName);
 BOOL InitEditPlayersListView(HWND hWndListView);
@@ -317,7 +311,7 @@ INT_PTR CALLBACK	FetchMailDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPA
 INT_PTR CALLBACK	SendStatusUpdateDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	EditMessageDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	ReceiveMessageDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-INT_PTR CALLBACK EditPlainEmailDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK	EditPlainEmailDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 BOOL SendPlainEmail(PlainEmail *msg);
 BOOL EditPlainEmail(TCHAR *toName, TCHAR *toAddress);
 BOOL checkEmailFormat(TCHAR *email);
@@ -334,7 +328,7 @@ int SendEmail(FILE *email, TCHAR **recipients, BOOL quiet);
 TCHAR *BuildNameAddressStr(TCHAR *out, TCHAR *name, TCHAR *address);
 TCHAR *BuildNameAddressList(TCHAR *outStr, TCHAR **names, TCHAR **addresses);
 TCHAR *BuildEmailText(SessionInfo *session);
-TCHAR *BuildChatEmailText(ChatMessage *chatMsg, BOOL broadcast);
+TCHAR *BuildChatEmailText(ChatMessage *chatMsg);
 int FetchEmails(BOOL quiet);
 void ParseEmails();
 void ParseEmail(MailMessageW *msg);
@@ -347,18 +341,18 @@ BOOL CreateSendEmailThread();
 void TerminateSendEmailThread();
 DWORD WINAPI RecvEmailThreadProc(LPVOID lpParam);
 DWORD WINAPI SendEmailThreadProc(LPVOID lpParam);
-void StartOutgoingMailTimer();
 BOOL CheckMail();
 int CheckOutgoingMail(BOOL quiet);
 TCHAR *GetFirstOutgoingEmail(TCHAR *filePath);
 int GetIncomingTimerInterval();
+void ActivateMailer();
 
 // Settings Functions
 INT_PTR CALLBACK	SettingsDialogProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	MailSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	GeneralSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
-INT_PTR CALLBACK	NotifySettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK	MailSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	GGSettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK	NotifySettingsDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	GGTopLevelDialogProc(HWND hDialog, UINT message, WPARAM wParam, LPARAM lParam);
 HWND InitDialogGeneralSettings();
 HWND InitDialogMailSettings(MailSettings *ms);
@@ -368,93 +362,101 @@ BOOL ParseDialogGeneralSettings();
 BOOL ParseDialogMailSettings(MailSettings *ms);
 BOOL ParseDialogGGSettings(LinkedList *llGGSettings);
 BOOL ParseDialogNotifySettings();
-BOOL ValidateGlobalGameSettings(GlobalGameSettings *game, int type, int gIndex);
 BOOL ValidateGGSettingsList(LinkedList *llGGSettings);
 BOOL ValidateGGSettingsListTopLevel();
 BOOL ValidateMailSettings(HWND hDialog, MailSettings *ms, BOOL cfgFile);
 void UpdateSettings(MailSettings *ms, LinkedList *llGGSettings);
 void UpdateGGSettings(LinkedList *inGGList);
 BOOL LoadMailSettings();
-BOOL LoadGlobalGameSettings();
 void SaveMailSettings();
+BOOL LoadGlobalGameSettings();
 void SaveGlobalGameSettings();
 void CopyGGSettingsList(LinkedList *out, LinkedList *in);
 HWND CreateGGChildDialog(int gameIndex, HWND hParent);
 int ChangeSettingsPage(int settingsPage);
 GlobalGameSettings *FindGlobalGameSettings(TCHAR *id);
 int FindGGIndexByID(LinkedList *llGGSettings, TCHAR *gameID);
+TCHAR *GetGGFileStorePath(GlobalGameSettings *ggs, TCHAR *path);
 
-// Other functions
+// Other GUI Functions
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	MainListViewProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK	StatusBarProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	QuitDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+int MessageBoxS(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
+INT_PTR DialogBoxParamS(HINSTANCE hInstance, LPCWSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
+ATOM MyRegisterClass(HINSTANCE hInstance);
+BOOL InitInstance(HINSTANCE, int nCmdShow);
+BOOL InitMainListView(HWND hWndListView);
+LRESULT CALLBACK DisableMainWndProc(int nCode, WPARAM wParam, LPARAM lParam);
+void AddHistoryString(LinkedList *history, TCHAR *newStr, BOOL addToFront);
+void ShowPopMenu(HWND hWnd);
+void ViewHotkeysHelp();
+
+// File system and OS helper functions
 uint32_t GetIPFromName(char *name);
+BOOL IsInternetConnected();
 uint8_t GetCPULoad();
 uint64_t GetLoopSpeed();
-int mod(int a, int b);
-void CreateSchTask(TCHAR *taskName, TCHAR *taskPath, TCHAR *taskArgs, int trigger);
-//void CreateSchTaskElevated(TCHAR *taskName, TCHAR *taskPath);
-void CheckSchTasks();
-void RunSchTask();
-BOOL IsWow64();
-//DWORD GetProcSpeed();
 DWORD GetBaseProcSpeed();
 DWORD GetProcSpeed();
 void SleepC(DWORD benchMilliSeconds);
-void LoadGamePlugins();
-void FreeGamePlugins();
-int WinTmpFile(FILE **tmp);
-BOOL AddProgramToStartupRegistry(BOOL minimized);
-BOOL RemoveProgramFromStartupRegistry();
-BOOL AddProgramToStartup(BOOL minimized);
-BOOL RemoveProgramFromStartup();
-void SetAppPaths();
-ATOM MyRegisterClass(HINSTANCE hInstance);
-BOOL InitInstance(HINSTANCE, int nCmdShow);
-int MessageBoxS(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
-INT_PTR DialogBoxParamS(HINSTANCE hInstance, LPCWSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
-void ViewHotkeysHelp();
-void ShowPopMenu(HWND hWnd);
-int GetWindowX(HWND hWnd);
-int GetWindowY(HWND hWnd);
+int mod(int a, int b);
 unsigned int BigRand(void);
-void redrawListViewItem(int iItem);
-void ForceSetForegroundWindow(HWND hWnd);
-void SetTopMost(HWND hWnd);
 TCHAR *trimWhiteSpace(TCHAR *inputStr);
 TCHAR *RemoveWhiteSpace(TCHAR *inStr, TCHAR *outStr);
-HFONT CreateFixedFont();
-void AssignPluginCallbacks(PluginCallbacks *callbacks);
 BOOL GetFileSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle, TCHAR *initialDir, TCHAR *filter);
 BOOL GetFolderSelection(HWND hWnd, LPTSTR szBuf, LPCTSTR szTitle);
 int removeFolder(TCHAR *dir);
-void AddHistoryString(LinkedList *history, TCHAR *newStr, BOOL addToFront);
-BOOL InitMainListView(HWND hWndListView);
-void ActivateMailer();
-void WaitHotKeyRelease(LPARAM lParam);
-void CheckHotKeys();
-BOOL IsInternetConnected();
+int WinTmpFile(FILE **tmp);
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+BOOL IsWow64();
+BOOL ExecuteCmd(TCHAR *cmd);
+BOOL ExecuteCmdEx(TCHAR *cmd, TCHAR *dir, BOOL bWait);
+BOOL EncryptString(TCHAR *decPass, uint8_t *encPass, int *encPassSize);
+BOOL DecryptString(TCHAR *decPass, uint8_t *encPass, int encPassSize);
+DWORD GetFileCRC(TCHAR *filePath);
+
+// GUI helper functions
+int GetWindowX(HWND hWnd);
+int GetWindowY(HWND hWnd);
 int DLUToPixelsX(HWND hDialog, int dluX);
 int DLUToPixelsY(HWND hDialog, int dluY);
 void MoveDlgItemRelative(HWND hDlg, int nIDDlgItem, int xOffset, int yOffset);
 void SetWindowPosDialogRelative(HWND hDialog, HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
 void MoveWindowRelative(HWND hWnd, int xOffset, int yOffset);
+HFONT CreateFixedFont();
 HFONT CreateDialogFont(TCHAR *name, double size, int weight);
 HFONT CreateWindowFont(TCHAR *name, int height, int weight);
+void redrawListViewItem(int iItem);
+void ForceSetForegroundWindow(HWND hWnd);
+void SetTopMost(HWND hWnd);
+void CentreWindow(HWND hWnd);
+void ShowTaskBar(BOOL show);
+void PrintWindowNameAndClass();
+
+// Config file helper functions
 BOOL ReplaceLinesInFile(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int numSearches);
 BOOL AddLinesToFile(TCHAR *srcPath, TCHAR *destPath, SearchReplace *strings, int numSearches);
 int ReplaceSubStrings(TCHAR *dest, size_t destSize, TCHAR *src, TCHAR *searchStr, TCHAR *replaceStr);
-BOOL ExecuteCmd(TCHAR *cmd);
-BOOL ExecuteCmdEx(TCHAR *cmd, TCHAR *dir, BOOL bWait);
-void CentreWindow(HWND hWnd);
-void WaitUntilWindowDrawn();
-void ShowTaskBar(BOOL show);
-void PrintWindowNameAndClass();
-LRESULT CALLBACK DisableMainWndProc(int nCode, WPARAM wParam, LPARAM lParam);
-BOOL EncryptString(TCHAR *decPass, uint8_t *encPass, int *encPassSize);
-BOOL DecryptString(TCHAR *decPass, uint8_t *encPass, int encPassSize);
-DWORD GetFileCRC(TCHAR *filePath);
+
+// Misc functions
+void LoadGamePlugins();
+void FreeGamePlugins();
+void CreateSchTask(TCHAR *taskName, TCHAR *taskPath, TCHAR *taskArgs, int trigger);
+void RunSchTask();
+BOOL AddProgramToStartupRegistry(BOOL minimized);
+BOOL RemoveProgramFromStartupRegistry();
+BOOL AddProgramToStartup(BOOL minimized);
+BOOL RemoveProgramFromStartup();
+void SetAppPaths();
+void AssignPluginCallbacks(PluginCallbacks *callbacks);
+void WaitHotKeyRelease(LPARAM lParam);
+void CheckHotKeys();
+typedef int WINAPI Wow64DisableWow64FsRedirectionFn(PVOID *OldValue);
+typedef int WINAPI Wow64RevertWow64FsRedirectionFn(PVOID OldValue);
+void DisableWow64Redirection(BOOL disable);
+
 
 #endif

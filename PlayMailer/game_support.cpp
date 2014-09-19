@@ -1289,30 +1289,6 @@ BOOL WaitForSaveFile(SessionInfo *session)
 }
 */
 
-int DLUToPixelsX(HWND hDialog, int dluX)
-{
-	RECT rc;
-
-	memset(&rc, 0, sizeof(RECT));
-	rc.left = dluX;
-
-	MapDialogRect(hDialog, &rc);
-
-	return rc.left;
-}
-
-int DLUToPixelsY(HWND hDialog, int dluY)
-{
-	RECT rc;
-
-	memset(&rc, 0, sizeof(RECT));
-	rc.top = dluY;
-	
-	MapDialogRect(hDialog, &rc);
-
-	return rc.top;
-}
-
 BOOL GetDOSBoxConfPath(TCHAR *outPath)
 {
 	FILE *stdFile;

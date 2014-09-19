@@ -302,6 +302,7 @@ exit 0</Command>
     <ClInclude Include="include\smtpsend.h" />
     <ClInclude Include="include\targetver.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
