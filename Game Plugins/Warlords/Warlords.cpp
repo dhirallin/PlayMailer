@@ -193,7 +193,7 @@ BOOL GWarlords::LoadGame()
 	if(*PTR_NewGameInstance) 
 	{	
 		PressKey(VK_L);
-		SleepC(4500); // Wait for Load window to appear
+		SleepC(4000); // Wait for Load window to appear
 	}
 	else
 	{
@@ -977,16 +977,12 @@ BOOL GWarlords::RunWLED()
 	else
 		runDelay = 8 * SECONDS;
 
-	DisableInput(TRUE);
-
 	swprintf(runPath, MAX_PATH, L"\"%s\" -c \"mount C: \'%s\'\" -c \"C:\" -c \"WLED.EXE PLAYMAIL.WL\"", DOSBox, ggSettings->gameFolderPath);
 	//swprintf(runPath, MAX_PATH, L"\"%s\" \"%sWLED.EXE\"", DOSBox, ggSettings->gameFolderPath);
 	if(!BringProgramToFront(runPath, NULL, ggSettings, NULL, NULL, runDelay))
-	{
-		DisableInput(FALSE);
 		return FALSE;
-	}
-	
+
+	DisableInput(TRUE);
 	PressHotKey(VK_LSHIFT, VK_F3);
 	SleepC(500);
 	StartWriteFileThread(exePath);

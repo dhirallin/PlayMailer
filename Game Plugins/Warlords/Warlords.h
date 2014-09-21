@@ -41,7 +41,7 @@ public:
 		this->gameDetails = L"SSG 1990";
 		this->MAX_TEAMS = 8;
 		this->NUM_FACTIONS = 8;
-		this->RUN_DELAY = 6 * SECONDS;
+		this->RUN_DELAY = 7 * SECONDS;
 		this->FS_MOUSE_MODIFIER = 2.0;
 
 		this->KillBeforeRunGame = TRUE;

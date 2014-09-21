@@ -434,6 +434,7 @@ void ForceSetForegroundWindow(HWND hWnd);
 void SetTopMost(HWND hWnd);
 void CentreWindow(HWND hWnd);
 void ShowTaskBar(BOOL show);
+void CheckMessageQueue();
 void PrintWindowNameAndClass();
 
 // Config file helper functions

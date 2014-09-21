@@ -19,6 +19,7 @@ DWORD ProcSpeed = 0;							// CPU clock speed adjusted for current CPU load
 TCHAR mbBuffer[MBBUFFER_SIZE];					// Temp buffer for storing MessageBox strings
 
 HINSTANCE hInst;								// Current program instance
+HACCEL hAccelTable;								// Accelerator table
 HANDLE hAppMutex;								// Mutex used to prevent multiple instances running
 HHOOK hMsgBoxHook;								// Hook disables the main window after a MessageBox is created and enables it after MessageBox destroyed
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
@@ -159,7 +160,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(hPrevInstance);
 
 	MSG msg;
-	HACCEL hAccelTable;
 	INITCOMMONCONTROLSEX icex;
 	HINSTANCE hRichEditLib;
 	BOOL globalGameSettingsOK, mailSettingsOK, hotkeysOK = TRUE;
@@ -4832,7 +4832,7 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 	
 	switch (message)
 	{
-		case WM_INITDIALOG:
+		case WM_INITDIALOG:	
 			chatMsg = (ChatMessage *)lParam;
 
 			swprintf(mbBuffer, MBBUFFER_SIZE, L"PlayMailer - Message Received - %s", chatMsg->sessionName);
@@ -4872,7 +4872,7 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 				ShowWindow(GetDlgItem(hDialog, IDC_SKIPALL_BUTTON), SW_HIDE);
 				Button_SetText(GetDlgItem(hDialog, IDCANCEL), L"Close");
 			}
-
+			
 			SendDlgItemMessage(hDialog, IDC_RECIPIENTS_EDIT, WM_SETTEXT, 0, (LPARAM)recipients);
 			SendDlgItemMessage(hDialog, IDC_MESSAGE_EDIT, WM_SETTEXT, 0, (LPARAM)chatMsg->message);
 
@@ -4898,6 +4898,9 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 			SetTopMost(hDialog);
 			EnableWindow(hMainWnd, FALSE);
 			
+			//DisableInput(TRUE);
+			//SetTimer(hDialog, DISABLE_INPUT_TIMER, DISABLE_INPUT_INTERVAL, NULL);
+
 			return (INT_PTR)TRUE;	
 		case WM_COMMAND:
 			switch(LOWORD(wParam)) 
@@ -4932,9 +4935,18 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 			if(GetWindowLong((HWND)lParam, GWL_EXSTYLE) & WS_EX_TRANSPARENT) 
 			{
 				SetBkColor((HDC)wParam, bkColor);
+
 				return (INT_PTR)bkBrush;
 			}
 			break;
+		/*case WM_TIMER:
+			switch(wParam) 
+			{
+				case DISABLE_INPUT_TIMER:
+					DisableInput(FALSE);
+					return 0;
+			}
+			break;*/
 		default:
 			break;
 	}	
@@ -6018,7 +6030,7 @@ void ParseEmailChatMessage(MailMessageW *msg)
 		}
 		
 		ret = DialogBoxParamS(hInst, MAKEINTRESOURCE(IDD_RECEIVE_MESSAGE), NULL, ReceiveMessageDialogProc, (LPARAM)&chatMsg);
-	
+
 		for(int i = 0; msg->to_addresses[i]; i++)
 		{
 			if(!_wcsicmp(mail->email, msg->to_addresses[i]))
@@ -8292,6 +8304,22 @@ void ShowPopMenu(HWND hWnd)
                pt.x, pt.y,0, hWnd, NULL);
 }
 
+void ViewHotkeysHelp()
+{
+	MessageBoxS(NULL, L"\
+Use these hotkeys from within the game window, e.g. in DOSBox.\n\n\
+Ctrl+Shift+ S - Save the game and send it to the next player.\n\
+       REMEMBER THIS HOTKEY. When you have finished your turn,\n\
+       use this hotkey INSTEAD of selecting 'End Turn'. The game\n\
+       will be sent to the next player.\n\
+Ctrl+Shift+ L - Load the currently selected session.\n\
+Ctrl+Shift+ M - Send a chat message to all players.\n\
+Ctrl+Shift+ P - Open the Player List (Send chat to individual players.)\n\
+Ctrl+Shift+ O - Open the Settings page for this session.\n\
+Ctrl+Shift+ H - Show this help window.\n\
+	", L"PlayMailer In-game Hotkeys", MB_OK);
+}
+
 /** File system and OS helper functions **/
 
 uint32_t GetIPFromName(char *name)
@@ -8415,7 +8443,7 @@ DWORD GetProcSpeed()
 
 	cpuLoad = GetCPULoad();
 
-	return (DWORD)BaseProcSpeed * (100 - MAX(cpuLoad, 50)) / 100;
+	return (DWORD)BaseProcSpeed * (100 - MIN(cpuLoad, 50)) / 100;
 }
 
 void SleepC(DWORD benchMilliSeconds)
@@ -8910,20 +8938,18 @@ void PrintWindowNameAndClass()
 	MessageBoxS(NULL, mbBuffer, L"Window Text and Class", MB_OK);
 }
 
-void ViewHotkeysHelp()
+void CheckMessageQueue()
 {
-	MessageBoxS(NULL, L"\
-Use these hotkeys from within the game window, e.g. in DOSBox.\n\n\
-Ctrl+Shift+ S - Save the game and send it to the next player.\n\
-       REMEMBER THIS HOTKEY. When you have finished your turn,\n\
-       use this hotkey INSTEAD of selecting 'End Turn'. The game\n\
-       will be sent to the next player.\n\
-Ctrl+Shift+ L - Load the currently selected session.\n\
-Ctrl+Shift+ M - Send a chat message to all players.\n\
-Ctrl+Shift+ P - Open the Player List (Send chat to individual players.)\n\
-Ctrl+Shift+ O - Open the Settings page for this session.\n\
-Ctrl+Shift+ H - Show this help window.\n\
-	", L"PlayMailer In-game Hotkeys", MB_OK);
+	MSG msg;
+
+	while(PeekMessage(&msg, NULL, 0, 0, TRUE))
+	{	
+		if (!TranslateAccelerator(hMainWnd, hAccelTable, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
 }
 
 /** Config file helper functions **/

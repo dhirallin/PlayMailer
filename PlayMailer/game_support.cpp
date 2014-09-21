@@ -48,8 +48,6 @@ BOOL _NewGame(SessionInfo *session)
 	if(!session->PreNewGameEvent())
 		return FALSE;
 
-	DisableInput(TRUE);
-
 	if(!BringGameToFront())
 	{
 		if(session->sessionRunCommand[0] != L'\0')
@@ -57,13 +55,13 @@ BOOL _NewGame(SessionInfo *session)
 		else
 			pRunCommand = session->ggSettings->runCommand;
 
-		DisableInput(FALSE);
-
 		swprintf(mbBuffer, MBBUFFER_SIZE, L"Unable to run command \'%s\'.", pRunCommand);
 		MessageBoxS(NULL, mbBuffer, L"Error running game", MB_OK | MB_ICONERROR);
 		
 		return FALSE;
 	}
+
+	DisableInput(TRUE);
 
 	if(!session->NewGame())
 	{
@@ -387,7 +385,7 @@ int BringProgramToFront(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSetti
 			{
 				SleepC(500); // Wait some more for good measure
 				initProgramInput(ggs, hWnd);
-	
+
 				return ret;	
 			}
 
@@ -410,7 +408,13 @@ HWND RunProgram(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSettings *ggs
 	if(!ExecuteCmdEx(runCommand, startInFolder, FALSE))
 		return NULL;
 
-	SleepC(runDelay);
+	DisableInput(TRUE);
+	for(int i = 0; i < 10; i++)
+	{
+		SleepC(MAX(1, runDelay / 10));
+		CheckMessageQueue();
+	}
+	DisableInput(FALSE);
 
 	for(int i = 0; i < 100; i++)
 	{

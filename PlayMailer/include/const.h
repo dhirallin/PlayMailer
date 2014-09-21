@@ -115,6 +115,8 @@ extern "C"
 #define IMAP_IDLE_INTERVAL				5 * MINUTES // 29 minutes according to IMAP RFC -- set to 5 for dumb servers
 #define CHECK_TOPMOST_TIMER				6
 #define CHECK_TOPMOST_INTERVAL			1 * SECONDS
+#define DISABLE_INPUT_TIMER				7
+#define DISABLE_INPUT_INTERVAL			500
 
 #define MAX_FAILED_FETCHES		5
 #define MAX_FAILED_SENDS		5
