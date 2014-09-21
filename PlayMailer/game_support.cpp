@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "game_support.h"
 
-HHOOK hMouseHook, hKeyboardHook;
+//HHOOK hMouseHook, hKeyboardHook;
 HWND hGameSettingsDialog, hGGChildDialog;
 
 BOOL NewGameInstance;
@@ -249,6 +249,7 @@ BOOL SuspendResumeGame(BOOL suspend)
 	HWND hFG;
 	static HANDLE hDBThread = NULL;
 	static int suspendCount = 0;
+	static HHOOK hKeyboardHook, hMouseHook;
 
 	if(suspend) 
 	{
@@ -939,6 +940,8 @@ BOOL _LoadGame(SessionInfo *session, BOOL exportSave)
 
 void DisableInput(BOOL disable)
 {
+	static HHOOK hMouseHook = NULL, hKeyboardHook = NULL;
+
 	/*TCHAR runCommand[MAX_PATH];
 
 	swprintf(runCommand, MAX_PATH, L"\"%s\\bin\\%s\" %s", AppFolderPath, (IsWow64() ? L"PlayMailerDI64.exe" : L"PlayMailerDI32.exe"), (disable ? L"/DISABLE" : L"/ENABLE"));
@@ -951,8 +954,12 @@ void DisableInput(BOOL disable)
 	}
 	else
 	{
-		UnhookWindowsHookEx(hMouseHook);
-		UnhookWindowsHookEx(hKeyboardHook);
+		if(hMouseHook)
+			UnhookWindowsHookEx(hMouseHook);
+		if(hKeyboardHook)
+			UnhookWindowsHookEx(hKeyboardHook);
+
+		hMouseHook = hKeyboardHook = NULL;
 	}
 }
 

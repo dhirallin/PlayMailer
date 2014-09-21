@@ -4898,8 +4898,8 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 			SetTopMost(hDialog);
 			EnableWindow(hMainWnd, FALSE);
 			
-			//DisableInput(TRUE);
-			//SetTimer(hDialog, DISABLE_INPUT_TIMER, DISABLE_INPUT_INTERVAL, NULL);
+			DisableInput(TRUE);
+			SetTimer(hDialog, DISABLE_INPUT_TIMER, DISABLE_INPUT_INTERVAL, NULL);
 
 			return (INT_PTR)TRUE;	
 		case WM_COMMAND:
@@ -4922,6 +4922,7 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 			break;
 		case WM_DESTROY:
 			DeleteObject(bkBrush);
+			DisableInput(FALSE);
 			EnableWindow(hMainWnd, TRUE);
 			EndDialog(hDialog, IDCANCEL);
 			break;
@@ -4939,14 +4940,14 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 				return (INT_PTR)bkBrush;
 			}
 			break;
-		/*case WM_TIMER:
+		case WM_TIMER:
 			switch(wParam) 
 			{
 				case DISABLE_INPUT_TIMER:
 					DisableInput(FALSE);
 					return 0;
 			}
-			break;*/
+			break;
 		default:
 			break;
 	}	
