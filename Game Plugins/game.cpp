@@ -406,7 +406,9 @@ void GlobalGameSettings::InitInput(HWND hWnd)
 		pt.x = pt.y = 0;
 		ClientToScreen(hWnd, &pt);
 		SetCursorPos(pt.x, pt.y); 
+		SleepC(50);
 		PressLButton();
+		SleepC(50);
 	}
 
 	SetMouseModifier(hWnd);

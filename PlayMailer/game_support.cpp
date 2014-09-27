@@ -374,6 +374,8 @@ int BringProgramToFront(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSetti
 			ret = 2;
 	}
 
+	DisableInput(TRUE);
+
 	if(IsIconic(hWnd))
 		ShowWindow(hWnd, SW_SHOWNORMAL);
 	SetForegroundWindow(hWnd);
@@ -386,6 +388,7 @@ int BringProgramToFront(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSetti
 			{
 				SleepC(500); // Wait some more for good measure
 				initProgramInput(ggs, hWnd);
+				DisableInput(FALSE);
 
 				return ret;	
 			}
@@ -396,6 +399,7 @@ int BringProgramToFront(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSetti
 		SleepC(50);
 	}	
 
+	DisableInput(FALSE);
 	return 0;
 }
 
