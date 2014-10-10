@@ -62,12 +62,15 @@ BOOL _NewGame(SessionInfo *session)
 	}
 
 	DisableInput(TRUE);
+	LockSetForegroundWindow(LSFW_LOCK);
 
 	if(!session->NewGame())
 	{
+		LockSetForegroundWindow(LSFW_UNLOCK);
 		DisableInput(FALSE);
 		return FALSE;
 	}
+	LockSetForegroundWindow(LSFW_UNLOCK);
 	DisableInput(FALSE);
 
 	if(session->ggSettings->restoreColorDepth)
@@ -386,9 +389,11 @@ int BringProgramToFront(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSetti
 		{
 			if(isProgramWindow(ggs, hFG)) 
 			{
+				LockSetForegroundWindow(LSFW_LOCK);
 				SleepC(500); // Wait some more for good measure
 				initProgramInput(ggs, hWnd);
 				DisableInput(FALSE);
+				LockSetForegroundWindow(LSFW_UNLOCK);
 
 				return ret;	
 			}
@@ -414,12 +419,14 @@ HWND RunProgram(TCHAR *runCommand, TCHAR *startInFolder, GlobalGameSettings *ggs
 		return NULL;
 
 	DisableInput(TRUE);
+	LockSetForegroundWindow(LSFW_LOCK);
 	for(int i = 0; i < 10; i++)
 	{
 		SleepC(MAX(1, runDelay / 10));
 		CheckMessageQueue();
 	}
 	DisableInput(FALSE);
+	LockSetForegroundWindow(LSFW_UNLOCK);
 
 	for(int i = 0; i < 100; i++)
 	{
@@ -920,14 +927,16 @@ BOOL _LoadGame(SessionInfo *session, BOOL exportSave)
 		return FALSE;
 	}
 
+	LockSetForegroundWindow(LSFW_LOCK);
 	DisableInput(TRUE);
 
 	if(!session->LoadGame())
 	{
+		LockSetForegroundWindow(LSFW_UNLOCK);
 		DisableInput(FALSE);
 		return FALSE;
 	}
-
+	LockSetForegroundWindow(LSFW_UNLOCK);
 	DisableInput(FALSE);
 
 	if(session->ggSettings->restoreColorDepth)
