@@ -9,12 +9,14 @@ Special class, initializers for windows
 
 #include <winsock2.h>
 
+#define USE_SASL
+
 #ifdef _MSC_VER
-extern "C" {
-#include "mmapstring_private.h"
 #include "mailstream_ssl_private.h"
-}
+#include "mmapstring_private.h"
+#include "mailsasl_private.h"
 #endif
+
 
 class win_init {
   public:
@@ -23,10 +25,18 @@ class win_init {
 		wsocket_init();
 
 #ifdef _MSC_VER
-		/* Initialise Mutexs */
+		/* Initialize Mutexes */
 		mmapstring_init_lock();
+
+#ifdef USE_SSL
 		mailstream_ssl_init_lock();
 #endif
+
+#ifdef USE_SASL
+        mailsasl_init_lock();
+#endif
+#endif
+
 	}
 	~win_init() {
 		WSACleanup();
@@ -47,4 +57,6 @@ class win_init {
 
 /* Initialise  */
 static win_init windows_startup;
+
+
 
