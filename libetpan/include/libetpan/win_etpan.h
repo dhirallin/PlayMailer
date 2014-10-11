@@ -17,9 +17,16 @@
 #endif
 
 #ifdef WIN32
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT 0x0501
 #include <winsock2.h>
-#undef EINPROGRESS
+#include <ws2tcpip.h>
+#ifndef EINPROGRESS
 #define EINPROGRESS WSAEINPROGRESS
+#endif
+#include <windows.h>
 #endif
 
 #ifdef __cplusplus

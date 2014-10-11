@@ -92,7 +92,7 @@ static int fetch_msg(struct mailimap * imap, uint32_t uid)
 	sprintf_s(filename, sizeof(filename), "incoming/%u.eml", (unsigned int) uid);
 	r = stat(filename, &stat_info);
 	if (r == 0) {
-		// already cached
+		// already cachde
 		printf("%u is already fetched\n", (unsigned int) uid);
 		return 0;
 	}

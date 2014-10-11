@@ -1,8 +1,6 @@
 #ifndef LIBETPAN_CONFIG_H
 #define LIBETPAN_CONFIG_H
 
-#define LIBETPAN_STATIC
-
 #ifdef WIN32
 #	define PATH_MAX 512
 
@@ -37,17 +35,29 @@
 #	endif
 
 	/* use Windows Types */
+#   if !defined(uint8_t)
+		typedef UINT8 uint8_t;
+#   endif
 #	if !defined(ssize_t)
 		typedef SSIZE_T ssize_t;
 #	endif
 #	if !defined(uint16_t)
 		typedef UINT16 uint16_t;
 #	endif
+#	if !defined(int16_t)
+		typedef INT16 int16_t;
+#	endif
 #	if !defined(uint32_t)
 		typedef UINT32 uint32_t;
 #	endif
 #	if !defined(int32_t)
 		typedef INT32 int32_t;
+#	endif
+#	if !defined(uint64_t)
+		typedef UINT64 uint64_t;
+#	endif
+#	if !defined(int64_t)
+		typedef INT64 int64_t;
 #	endif
 #	if !defined(pid_t)
 		typedef DWORD pid_t;
@@ -70,19 +80,18 @@
 #endif
 #define MAIL_DIR_SEPARATOR '/'
 #define MAIL_DIR_SEPARATOR_S "/"
-
+#ifdef LIBETPAN_STATIC
+#define LIBETPAN_EXPORT
+#else
 #ifdef _MSC_VER
-#	ifdef LIBETPAN_STATIC
-#		define LIBETPAN_EXPORT
+#	ifdef LIBETPAN_DLL
+#		define LIBETPAN_EXPORT __declspec(dllexport)
 #	else
-#		ifdef LIBETPAN_DLL
-#			define LIBETPAN_EXPORT __declspec(dllexport)
-#		else
-#			define LIBETPAN_EXPORT __declspec(dllimport)
-#		endif
-#	endif
+#		define LIBETPAN_EXPORT __declspec(dllimport)
+#   endif
 #else
 #	define LIBETPAN_EXPORT
+#endif
 #endif
 
 	/* REENTRANT under WINDOWS */

@@ -4945,7 +4945,7 @@ INT_PTR CALLBACK ReceiveMessageDialogProc(HWND hDialog, UINT message, WPARAM wPa
 			{
 				case DISABLE_INPUT_TIMER:
 					DisableInput(FALSE);
-					return 0;
+					break;
 			}
 			break;
 		default:
@@ -5211,6 +5211,7 @@ BOOL EditChatMessage(int sessionIndex, TCHAR *fromName, BOOL *recipientsMask, TC
 		emailSent = TRUE;
 		free(chatMsg.message);
 	}
+	CheckMessageQueue(); // make sure window is destroyed.
 
 END:
 	if(recipientsMask)
@@ -6031,6 +6032,7 @@ void ParseEmailChatMessage(MailMessageW *msg)
 		}
 		
 		ret = DialogBoxParamS(hInst, MAKEINTRESOURCE(IDD_RECEIVE_MESSAGE), NULL, ReceiveMessageDialogProc, (LPARAM)&chatMsg);
+		CheckMessageQueue(); // Make sure window is fully destroyed.
 
 		for(int i = 0; msg->to_addresses[i]; i++)
 		{
@@ -6361,7 +6363,7 @@ DWORD WINAPI RecvEmailThreadProc(LPVOID lpParam)
 				{
 					FailedFetches = 0;
 
-					if(mail->inMailProtocol == PROTOCOL_IMAP && IMAPSocket != INVALID_SOCKET)
+					if(mail->inMailProtocol == PROTOCOL_IMAP && IMAPSocket != INVALID_SOCKET && !IMAPMailExists)
 						WSAEventSelect(IMAPSocket, hRecvEmailEvents[EVENT_RECVEMAIL_IMAPSOCKET], FD_READ | FD_CLOSE);	
 				}	
 				else

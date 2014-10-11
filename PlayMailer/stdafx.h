@@ -86,3 +86,5 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #pragma comment( lib, LIB_NAME_DECORATION("libconfig") )
 #pragma comment( lib, LIB_NAME_DECORATION("libetpan") )
+
+//#pragma comment( lib, "libeay32.lib")
