@@ -719,6 +719,9 @@ BOOL GWarlords::CheckForExternalScenario()
 			}
 		}
 
+		// Clear read-only permission on WARLORDS.EXE
+		SetFileAttributes(destCopy, GetFileAttributes(destCopy) & ~FILE_ATTRIBUTE_READONLY);
+
 		if(gameSettings.scenarioType == SCENARIO_WLED)
 			pExeName = WLEDExeName;
 		else
@@ -737,7 +740,12 @@ BOOL GWarlords::CheckForExternalScenario()
 	{
 		// Restore clean Warlords files if necessary
 		if(CopyWLEDFiles(backupPath, ggSettings->gameFolderPath, FALSE, TRUE))
+		{
 			killGame = TRUE;
+			// Clear read-only permission on WARLORDS.EXE
+			swprintf(destCopy, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
+			SetFileAttributes(destCopy, GetFileAttributes(destCopy) & ~FILE_ATTRIBUTE_READONLY);
+		}
 	}
 
 	if(gameSettings.scenarioType == SCENARIO_WLEDIT)
@@ -952,8 +960,8 @@ BOOL GWarlords::RunWLED()
 	GGWarlordsSettings *ggSettings = (GGWarlordsSettings *)this->ggSettings;
 
 	// Clear read-only permission on WARLORDS.EXE
-	swprintf(exePath, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
-	SetFileAttributes(exePath, GetFileAttributes(exePath) & ~FILE_ATTRIBUTE_READONLY);
+	//swprintf(exePath, MAX_PATH, L"%sWARLORDS.EXE", ggSettings->gameFolderPath);
+	//SetFileAttributes(exePath, GetFileAttributes(exePath) & ~FILE_ATTRIBUTE_READONLY);
 	
 	// Copy WLED Rescue file to game folder
 	swprintf(scenarioPath, MAX_PATH, L"%sPLAYMAIL.WL", ggSettings->gameFolderPath);
